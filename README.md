@@ -1,28 +1,27 @@
-# Darwill Driver Time Sheet Log — Version 0.5
+# Driver Time Sheet Log — Version 1.0
 
-Mobile-first GitHub Pages application for driver time studies.
+A mobile-first Progressive Web App for recording a driver's workday.
 
-## Corrected workflow
-1. Driver selects their name, vehicle, date, and start time.
-2. Tap **Start Shift**. This starts only the overall shift clock.
-3. The app displays **No Activity** until the driver chooses what they are doing.
-4. Tap **Start Activity** and select Driving, Loading, Unloading, Waiting, Fueling, Break, Lunch, Warehouse work, Vehicle issue, or Other.
-5. Finish or change activities throughout the day.
-6. Tap **End Day** and print/save PDF or export CSV/JSON.
+## Main workflow
+
+1. Select driver and vehicle.
+2. Start the shift. No activity starts automatically.
+3. Tap **Start Activity** and choose the actual task.
+4. Finish the activity or finish it and immediately start another.
+5. End the shift, review the report, print/save PDF, or export CSV/JSON.
 
 ## Included
-- No automatic Driving timer at shift start
-- Darwill vehicle dropdown
-- Vendor/address dropdown with recent locations first
-- One-tap timestamps and live activity timer
-- Resume unfinished shift
-- Local device backup after every action
-- Printable daily report
+
+- Modern app-style mobile interface
+- Driving, loading, unloading, waiting, fueling, lunch, vehicle issue, other
+- Drop-and-hook tools for the semi-truck
+- Vendor and postal location list with addresses
+- Local device backup and resume
+- Completed shift history
 - CSV and JSON exports
-- Offline service worker
+- Printable daily time sheet
+- Offline support after first load
 
-## GitHub Pages update
-Upload all five files in this folder to the repository root and replace the existing files. Commit the update and wait for GitHub Pages to deploy. Fully close and reopen the site on the phone. Confirm the header says **Version 0.5**.
+## GitHub Pages
 
-## Data note
-Data is stored only in the browser on that device. Export records regularly during the four-week study.
+Upload all files to the repository root. GitHub Pages should deploy from the `main` branch and `/ (root)` folder.
