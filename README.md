@@ -25,3 +25,11 @@ A mobile-first Progressive Web App for recording a driver's workday.
 ## GitHub Pages
 
 Upload all files to the repository root. GitHub Pages should deploy from the `main` branch and `/ (root)` folder.
+
+
+## Version 1.0.1 fix
+
+- Fixed page jumping to the top while scrolling.
+- Fixed notes fields losing focus while typing.
+- Fixed dropdown menus closing or resetting while scrolling.
+- Live timers now update without rebuilding the active screen every second.
