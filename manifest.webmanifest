@@ -1,11 +1,1 @@
-{
-  "name": "Driver Time Sheet Log",
-  "short_name": "Driver Log",
-  "description": "Mobile driver activity and productivity time sheet",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f4f7fa",
-  "theme_color": "#123a63",
-  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
-}
+{"name":"Darwill Driver Time Sheet Log","short_name":"Driver Log","start_url":"./","display":"standalone","background_color":"#eef3f7","theme_color":"#0b2a46","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}

@@ -1,21 +1,27 @@
-# Driver Time Sheet Log — Version 0.3
+# Darwill Driver Time Sheet Log — Version 0.4
 
-Mobile-first GitHub Pages application for a four-week driver time study.
+Mobile-first GitHub Pages application for driver time studies.
 
-## Version 0.3 additions
+## Main workflow
+1. Start Shift (driver and last vehicle are remembered)
+2. Driving starts automatically
+3. Tap Arrived
+4. Select a saved location and activity
+5. Tap Depart; Driving starts automatically
+6. Tap End Day and print/save PDF or export CSV/JSON
 
-- Vehicle dropdown for the Darwill fleet
-- Vendor/location dropdown with saved addresses
-- Other-location option
-- Optional **Stamp Current Address** button using the phone location
-- Only the readable address and timestamp are shown/saved; latitude and longitude are not displayed
-- Address is included in the timeline, printed time sheet, CSV, and JSON exports
-- Existing Version 0.2 device history remains available
+## Included
+- Darwill vehicle dropdown
+- Vendor/address dropdown with recent locations first
+- One-tap timestamps and live timer
+- Resume unfinished shift
+- Local device backup after every action
+- Printable daily report
+- CSV and JSON exports
+- Offline service worker
 
-## Upload
+## GitHub Pages update
+Upload all files in this folder to the repository root, replacing the existing files. Commit the update and wait for GitHub Pages to deploy. On the phone, fully close and reopen the site. If the older version remains, refresh once or remove and re-add the Home Screen shortcut.
 
-Upload all five files to the root of the existing GitHub repository and commit the changes. GitHub Pages will redeploy automatically. Refresh the phone page after deployment.
-
-## Location permission
-
-The browser asks for location permission only when the driver taps **Stamp Current Address**. A saved vendor can also be selected without using phone location. Address results can be corrected manually.
+## Data note
+Version 0.4 stores data only in the browser on that device. Export records regularly during the four-week study.
