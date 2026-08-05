@@ -1,49 +1,21 @@
-# Driver Time Sheet Log — Version 0.2
+# Driver Time Sheet Log — Version 0.3
 
-Mobile-first GitHub Pages web application for a four-week driver time study.
+Mobile-first GitHub Pages application for a four-week driver time study.
 
-## Main changes from Version 0.1
+## Version 0.3 additions
 
-- One-tap activity timestamps
-- Start and end current activity using the phone's current time
-- Full activity timeline instead of only customer stops
-- Live productivity dashboard
-- Saved driver name and vehicle profile
-- Manual correction option
-- Overlap and missing-time validation
-- Resume unfinished day
-- Local device history
-- CSV and JSON exports
-- Print or save daily sheet as PDF
-- Offline use after the first successful load
+- Vehicle dropdown for the Darwill fleet
+- Vendor/location dropdown with saved addresses
+- Other-location option
+- Optional **Stamp Current Address** button using the phone location
+- Only the readable address and timestamp are shown/saved; latitude and longitude are not displayed
+- Address is included in the timeline, printed time sheet, CSV, and JSON exports
+- Existing Version 0.2 device history remains available
 
-## Productive activities
+## Upload
 
-- Driving
-- Loading
-- Unloading
-- Fueling
-- Warehouse work
+Upload all five files to the root of the existing GitHub repository and commit the changes. GitHub Pages will redeploy automatically. Refresh the phone page after deployment.
 
-Waiting, Break, Lunch, Vehicle issue, Other, and unlogged shift time are counted as nonproductive.
+## Location permission
 
-## Updating the GitHub Pages site
-
-1. Open the existing GitHub repository.
-2. Upload the five Version 0.2 files.
-3. Allow GitHub to replace files with the same names.
-4. Commit the changes.
-5. Wait about one minute for GitHub Pages to redeploy.
-6. Refresh the website. On phones, fully close and reopen the page if the old version remains cached.
-
-## Test workflow
-
-1. Start a shift.
-2. Tap Driving and start it.
-3. End the current activity.
-4. Start Loading or Waiting.
-5. Close the browser and verify Resume Active Day works.
-6. End the day.
-7. Review totals.
-8. Print or save PDF.
-9. Export CSV and JSON.
+The browser asks for location permission only when the driver taps **Stamp Current Address**. A saved vendor can also be selected without using phone location. Address results can be corrected manually.
