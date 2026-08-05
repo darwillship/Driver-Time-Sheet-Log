@@ -1,19 +1,20 @@
-# Darwill Driver Time Sheet Log — Version 0.4
+# Darwill Driver Time Sheet Log — Version 0.5
 
 Mobile-first GitHub Pages application for driver time studies.
 
-## Main workflow
-1. Start Shift (driver and last vehicle are remembered)
-2. Driving starts automatically
-3. Tap Arrived
-4. Select a saved location and activity
-5. Tap Depart; Driving starts automatically
-6. Tap End Day and print/save PDF or export CSV/JSON
+## Corrected workflow
+1. Driver selects their name, vehicle, date, and start time.
+2. Tap **Start Shift**. This starts only the overall shift clock.
+3. The app displays **No Activity** until the driver chooses what they are doing.
+4. Tap **Start Activity** and select Driving, Loading, Unloading, Waiting, Fueling, Break, Lunch, Warehouse work, Vehicle issue, or Other.
+5. Finish or change activities throughout the day.
+6. Tap **End Day** and print/save PDF or export CSV/JSON.
 
 ## Included
+- No automatic Driving timer at shift start
 - Darwill vehicle dropdown
 - Vendor/address dropdown with recent locations first
-- One-tap timestamps and live timer
+- One-tap timestamps and live activity timer
 - Resume unfinished shift
 - Local device backup after every action
 - Printable daily report
@@ -21,7 +22,7 @@ Mobile-first GitHub Pages application for driver time studies.
 - Offline service worker
 
 ## GitHub Pages update
-Upload all files in this folder to the repository root, replacing the existing files. Commit the update and wait for GitHub Pages to deploy. On the phone, fully close and reopen the site. If the older version remains, refresh once or remove and re-add the Home Screen shortcut.
+Upload all five files in this folder to the repository root and replace the existing files. Commit the update and wait for GitHub Pages to deploy. Fully close and reopen the site on the phone. Confirm the header says **Version 0.5**.
 
 ## Data note
-Version 0.4 stores data only in the browser on that device. Export records regularly during the four-week study.
+Data is stored only in the browser on that device. Export records regularly during the four-week study.
