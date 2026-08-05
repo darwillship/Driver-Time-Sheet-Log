@@ -27,9 +27,22 @@ A mobile-first Progressive Web App for recording a driver's workday.
 Upload all files to the repository root. GitHub Pages should deploy from the `main` branch and `/ (root)` folder.
 
 
-## Version 1.0.1 fix
+## Version 1.0.3 fix
 
 - Fixed page jumping to the top while scrolling.
 - Fixed notes fields losing focus while typing.
 - Fixed dropdown menus closing or resetting while scrolling.
 - Live timers now update without rebuilding the active screen every second.
+
+
+## Version 1.0.3 fix
+
+- Fixed frozen live activity timer.
+- Live timer now displays minutes and seconds, then hours when needed.
+- Preserves the scrolling, dropdown, and notes-field focus fixes from Version 1.0.1.
+
+
+## Version 1.0.3
+- Displays the saved street address immediately after a customer/location is selected.
+- Shows separate origin and destination addresses for Driving.
+- Includes the address in the activity timeline.
