@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#123a63" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Driver Log" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>Driver Time Sheet Log</title>
+  <style>
+    :root {
+      --navy: #123a63;
+      --navy-dark: #0b2743;
+      --blue-soft: #eaf3fb;
+      --green: #177245;
+      --green-soft: #e9f7ef;
+      --red: #b42318;
+      --red-soft: #fff0ee;
+      --amber: #8a5a00;
+      --amber-soft: #fff7df;
+      --text: #182230;
+      --muted: #5b6777;
+      --line: #d7dee8;
+      --card: #ffffff;
+      --bg: #f4f7fa;
+      --shadow: 0 8px 24px rgba(18, 58, 99, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+      color: white;
+      padding: 18px 16px 22px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 3px 12px rgba(0,0,0,.18);
+    }
+
+    .header-row {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 { font-size: 1.32rem; margin: 0; }
+    .version { font-size: .8rem; opacity: .82; white-space: nowrap; }
+
+    main { max-width: 980px; margin: 0 auto; padding: 16px 14px 100px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 { margin: 0 0 14px; font-size: 1.08rem; color: var(--navy-dark); }
+    .card h3 { margin: 0 0 10px; font-size: 1rem; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .grid.two { grid-template-columns: 1fr; }
+
+    label { display: block; font-weight: 700; margin-bottom: 6px; font-size: .92rem; }
+    .hint { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border: 1px solid #b8c3d1;
+      border-radius: 10px;
+      font-size: 16px;
+      background: white;
+      color: var(--text);
+    }
+
+    textarea { min-height: 84px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid rgba(40, 120, 190, .18);
+      border-color: #2878be;
+    }
+
+    button, .button-link {
+      width: 100%;
+      min-height: 50px;
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .primary { background: var(--navy); color: white; }
+    .primary:hover { background: var(--navy-dark); }
+    .success { background: var(--green); color: white; }
+    .danger { background: var(--red); color: white; }
+    .secondary { background: #e8edf3; color: var(--navy-dark); }
+    .outline { background: white; color: var(--navy); border: 2px solid var(--navy); }
+    .small { min-height: 42px; font-size: .9rem; }
+
+    .actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+    .actions.two { grid-template-columns: 1fr 1fr; }
+
+    .notice {
+      border-radius: 11px;
+      padding: 12px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .notice.info { background: var(--blue-soft); color: var(--navy-dark); }
+    .notice.success { background: var(--green-soft); color: var(--green); }
+    .notice.error { background: var(--red-soft); color: var(--red); }
+    .notice.warn { background: var(--amber-soft); color: var(--amber); }
+
+    .hidden { display: none !important; }
+
+    .stop-card {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--navy);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .stop-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .stop-title { font-weight: 800; }
+    .stop-meta { color: var(--muted); font-size: .86rem; margin-top: 4px; }
+    .duration-badge { background: var(--blue-soft); color: var(--navy-dark); font-weight: 800; border-radius: 999px; padding: 5px 9px; white-space: nowrap; font-size: .82rem; }
+    .stop-notes { margin-top: 8px; color: #3c4654; font-size: .9rem; white-space: pre-wrap; }
+    .stop-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+    .summary-item { background: #f7f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .summary-label { color: var(--muted); font-size: .78rem; }
+    .summary-value { font-size: 1rem; font-weight: 900; margin-top: 2px; }
+    .summary-item.highlight { background: var(--green-soft); border-color: #b9dfc9; }
+    .summary-item.warning { background: var(--amber-soft); border-color: #ecd69a; }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: white;
+    }
+    .history-head { display: flex; justify-content: space-between; gap: 10px; }
+    .history-title { font-weight: 900; }
+    .history-meta { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+    .history-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+
+    .empty { color: var(--muted); text-align: center; padding: 18px 6px; }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 25;
+      background: rgba(255,255,255,.96);
+      border-top: 1px solid var(--line);
+      padding: 10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      backdrop-filter: blur(10px);
+    }
+    .footer-inner { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    dialog {
+      width: min(94vw, 600px);
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+    dialog::backdrop { background: rgba(5,17,29,.6); }
+    .dialog-body { padding: 18px; max-height: 88vh; overflow-y: auto; }
+
+    .timesheet-header { text-align: center; margin-bottom: 14px; }
+    .timesheet-title { font-weight: 900; font-size: 1.35rem; color: var(--navy-dark); }
+    .timesheet-subtitle { color: var(--muted); margin-top: 2px; }
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .detail-box { border: 1px solid var(--line); border-radius: 9px; padding: 8px; }
+    .detail-label { font-size: .75rem; color: var(--muted); }
+    .detail-value { font-weight: 800; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    th, td { border: 1px solid #bfc8d4; padding: 6px; text-align: left; vertical-align: top; }
+    th { background: #eaf0f6; }
+
+    @media (min-width: 700px) {
+      .grid.two { grid-template-columns: 1fr 1fr; }
+      .actions { grid-template-columns: repeat(2, 1fr); }
+      .actions.three { grid-template-columns: repeat(3, 1fr); }
+      .summary-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media print {
+      body { background: white; }
+      header, main > .card:not(#finalSheetCard), .footer-bar, .no-print { display: none !important; }
+      main { max-width: none; padding: 0; }
+      #finalSheetCard { display: block !important; border: 0; box-shadow: none; margin: 0; padding: 0; }
+      #finalSheetCard .card { box-shadow: none; border: 0; }
+      table { font-size: 9pt; }
+      @page { margin: .45in; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <h1>Driver Time Sheet Log</h1>
+      <div class="version">Version 0.1</div>
+    </div>
+  </header>
+
+  <main>
+    <div id="messageArea" aria-live="polite"></div>
+
+    <section id="resumeCard" class="card hidden">
+      <h2>Active Day Found</h2>
+      <div class="notice info" id="resumeText"></div>
+      <div class="actions two">
+        <button class="primary" id="resumeBtn">Resume Active Day</button>
+        <button class="danger" id="discardActiveBtn">Discard Active Day</button>
+      </div>
+    </section>
+
+    <section id="startCard" class="card">
+      <h2>Start Shift</h2>
+      <div class="grid two">
+        <div>
+          <label for="driverName">Driver name</label>
+          <input id="driverName" type="text" autocomplete="name" placeholder="Enter driver name" />
+        </div>
+        <div>
+          <label for="shiftDate">Date</label>
+          <input id="shiftDate" type="date" />
+        </div>
+        <div>
+          <label for="shiftStart">Start-of-shift time</label>
+          <input id="shiftStart" type="time" />
+        </div>
+        <div>
+          <label for="vehicleNumber">Vehicle or truck number</label>
+          <input id="vehicleNumber" type="text" placeholder="Example: Truck 12" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="success" id="startDayBtn">Start Day</button>
+      </div>
+    </section>
+
+    <section id="activeDayCard" class="card hidden">
+      <h2>Active Day</h2>
+      <div id="activeDayInfo" class="notice info"></div>
+      <div id="stopsList"></div>
+      <div id="noStops" class="empty">No stops or activities added yet.</div>
+      <div class="actions two">
+        <button class="primary" id="addStopBtn">+ Add Stop</button>
+        <button class="outline" id="viewCurrentBtn">View Current Totals</button>
+      </div>
+    </section>
+
+    <section id="currentSummaryCard" class="card hidden">
+      <h2>Current Totals</h2>
+      <div id="currentSummary" class="summary-grid"></div>
+    </section>
+
+    <section id="finalSheetCard" class="card hidden">
+      <div id="finalSheetContent"></div>
+      <div class="actions three no-print">
+        <button class="primary" id="printBtn">Print / Save PDF</button>
+        <button class="secondary" id="exportDayCsvBtn">Export This Day CSV</button>
+        <button class="secondary" id="exportDayJsonBtn">Export This Day JSON</button>
+      </div>
+      <div class="actions no-print">
+        <button class="outline" id="closeFinalBtn">Close Daily Time Sheet</button>
+      </div>
+    </section>
+
+    <section class="card no-print">
+      <h2>Saved History</h2>
+      <div id="historyList"></div>
+      <div id="noHistory" class="empty">No completed days saved on this device.</div>
+      <div class="actions three">
+        <button class="secondary" id="exportAllCsvBtn">Export All CSV</button>
+        <button class="secondary" id="exportAllJsonBtn">Export All JSON</button>
+        <button class="danger" id="clearHistoryBtn">Clear History</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="activeFooter" class="footer-bar hidden no-print">
+    <div class="footer-inner">
+      <button class="primary" id="footerAddStopBtn">+ Add Stop</button>
+      <button class="success" id="endDayBtn">End Day</button>
+    </div>
+  </div>
+
+  <dialog id="stopDialog">
+    <div class="dialog-body">
+      <h2 id="stopDialogTitle">Add Stop</h2>
+      <input id="editingStopId" type="hidden" />
+      <div class="grid two">
+        <div>
+          <label for="stopNumber">Stop number</label>
+          <input id="stopNumber" type="number" min="1" inputmode="numeric" readonly />
+        </div>
+        <div>
+          <label for="activityType">Activity type</label>
+          <select id="activityType">
+            <option value="">Select activity</option>
+            <option>Driving</option>
+            <option>Loading</option>
+            <option>Unloading</option>
+            <option>Waiting</option>
+            <option>Fueling</option>
+            <option>Break</option>
+            <option>Lunch</option>
+            <option>Warehouse work</option>
+            <option>Vehicle issue</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="arrivalTime">Arrival / start time</label>
+          <input id="arrivalTime" type="time" />
+        </div>
+        <div>
+          <label for="departureTime">Departure / end time</label>
+          <input id="departureTime" type="time" />
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label for="location">Location or customer</label>
+        <input id="location" type="text" placeholder="Customer, warehouse, fuel station, route, etc." />
+      </div>
+      <div style="margin-top:12px">
+        <label for="notes">Notes</label>
+        <textarea id="notes" placeholder="Optional details"></textarea>
+      </div>
+      <div id="stopError" class="notice error hidden" style="margin-top:12px"></div>
+      <div class="actions two">
+        <button class="success" id="saveStopBtn">Save Stop</button>
+        <button class="secondary" id="cancelStopBtn">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="endDayDialog">
+    <div class="dialog-body">
+      <h2>End Day</h2>
+      <div>
+        <label for="shiftEnd">End-of-shift time</label>
+        <input id="shiftEnd" type="time" />
+        <div class="hint">The total shift time is calculated from the shift start to this time.</div>
+      </div>
+      <div id="endDayError" class="notice error hidden" style="margin-top:12px"></div>
+      <div class="actions two">
+        <button class="success" id="confirmEndDayBtn">Finish and Save</button>
+        <button class="secondary" id="cancelEndDayBtn">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const KEYS = {
+    active: 'driverTimeSheet.activeDay.v01',
+    history: 'driverTimeSheet.history.v01',
+    profile: 'driverTimeSheet.profile.v01'
+  };
+
+  const PRODUCTIVE = new Set(['Driving', 'Loading', 'Unloading', 'Fueling', 'Warehouse work']);
+  const BREAK_LUNCH = new Set(['Break', 'Lunch']);
+  let activeDay = null;
+  let selectedCompletedDay = null;
+
+  const $ = (id) => document.getElementById(id);
+  const els = {
+    messageArea: $('messageArea'), resumeCard: $('resumeCard'), resumeText: $('resumeText'),
+    startCard: $('startCard'), activeDayCard: $('activeDayCard'), activeDayInfo: $('activeDayInfo'),
+    stopsList: $('stopsList'), noStops: $('noStops'), currentSummaryCard: $('currentSummaryCard'),
+    currentSummary: $('currentSummary'), finalSheetCard: $('finalSheetCard'), finalSheetContent: $('finalSheetContent'),
+    historyList: $('historyList'), noHistory: $('noHistory'), activeFooter: $('activeFooter'),
+    stopDialog: $('stopDialog'), endDayDialog: $('endDayDialog'), stopError: $('stopError'), endDayError: $('endDayError')
+  };
+
+  function nowTime() {
+    return new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  }
+
+  function todayDate() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function uid() {
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function parseMinutes(time) {
+    if (!time || !/^\d{2}:\d{2}$/.test(time)) return null;
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  function durationMinutes(start, end) {
+    const s = parseMinutes(start);
+    let e = parseMinutes(end);
+    if (s === null || e === null) return null;
+    if (e < s) e += 24 * 60;
+    return e - s;
+  }
+
+  function formatDuration(minutes) {
+    const safe = Math.max(0, Math.round(minutes || 0));
+    const h = Math.floor(safe / 60);
+    const m = safe % 60;
+    if (h === 0) return `${m} min`;
+    return `${h} hr ${m} min`;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(`${dateStr}T12:00:00`);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function showMessage(text, type = 'info') {
+    els.messageArea.innerHTML = `<div class="notice ${type}">${escapeHtml(text)}</div>`;
+    window.setTimeout(() => {
+      if (els.messageArea.textContent.includes(text)) els.messageArea.innerHTML = '';
+    }, 5000);
+  }
+
+  function readJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+    catch { return fallback; }
+  }
+
+  function saveActive() {
+    if (activeDay) localStorage.setItem(KEYS.active, JSON.stringify(activeDay));
+    else localStorage.removeItem(KEYS.active);
+  }
+
+  function getHistory() {
+    return readJson(KEYS.history, []);
+  }
+
+  function saveHistory(history) {
+    localStorage.setItem(KEYS.history, JSON.stringify(history));
+  }
+
+  function saveProfile(driverName, vehicleNumber) {
+    localStorage.setItem(KEYS.profile, JSON.stringify({ driverName, vehicleNumber }));
+  }
+
+  function loadProfile() {
+    const profile = readJson(KEYS.profile, {});
+    $('driverName').value = profile.driverName || '';
+    $('vehicleNumber').value = profile.vehicleNumber || '';
+  }
+
+  function calculateTotals(day) {
+    const totals = {
+      driving: 0,
+      loadingUnloading: 0,
+      waiting: 0,
+      breakLunch: 0,
+      productive: 0,
+      nonproductive: 0,
+      logged: 0,
+      shift: 0,
+      unlogged: 0,
+      productivityPct: 0
+    };
+
+    (day.stops || []).forEach(stop => {
+      const mins = durationMinutes(stop.arrivalTime, stop.departureTime) || 0;
+      totals.logged += mins;
+      if (stop.activityType === 'Driving') totals.driving += mins;
+      if (stop.activityType === 'Loading' || stop.activityType === 'Unloading') totals.loadingUnloading += mins;
+      if (stop.activityType === 'Waiting') totals.waiting += mins;
+      if (BREAK_LUNCH.has(stop.activityType)) totals.breakLunch += mins;
+      if (PRODUCTIVE.has(stop.activityType)) totals.productive += mins;
+      else totals.nonproductive += mins;
+    });
+
+    if (day.shiftStart && day.shiftEnd) totals.shift = durationMinutes(day.shiftStart, day.shiftEnd) || 0;
+    else if (day.shiftStart) totals.shift = durationMinutes(day.shiftStart, nowTime()) || 0;
+
+    totals.unlogged = Math.max(0, totals.shift - totals.logged);
+    // Unlogged time is treated as nonproductive so the productivity percentage does not overstate performance.
+    const totalNonproductiveIncludingUnlogged = totals.nonproductive + totals.unlogged;
+    totals.nonproductive = totalNonproductiveIncludingUnlogged;
+    totals.productivityPct = totals.shift > 0 ? (totals.productive / totals.shift) * 100 : 0;
+    return totals;
+  }
+
+  function summaryHtml(totals) {
+    const items = [
+      ['Driving', formatDuration(totals.driving)],
+      ['Loading / Unloading', formatDuration(totals.loadingUnloading)],
+      ['Waiting', formatDuration(totals.waiting)],
+      ['Break / Lunch', formatDuration(totals.breakLunch)],
+      ['Productive', formatDuration(totals.productive), 'highlight'],
+      ['Nonproductive', formatDuration(totals.nonproductive), 'warning'],
+      ['Total Shift', formatDuration(totals.shift)],
+      ['Productivity', `${totals.productivityPct.toFixed(1)}%`, 'highlight']
+    ];
+    return items.map(([label, value, cls = '']) => `
+      <div class="summary-item ${cls}">
+        <div class="summary-label">${label}</div>
+        <div class="summary-value">${value}</div>
+      </div>`).join('');
+  }
+
+  function renderApp() {
+    const hasActive = Boolean(activeDay);
+    els.startCard.classList.toggle('hidden', hasActive);
+    els.activeDayCard.classList.toggle('hidden', !hasActive);
+    els.activeFooter.classList.toggle('hidden', !hasActive);
+
+    if (!hasActive) {
+      els.currentSummaryCard.classList.add('hidden');
+      renderHistory();
+      return;
+    }
+
+    els.activeDayInfo.textContent = `${activeDay.driverName} • ${formatDate(activeDay.date)} • Start ${activeDay.shiftStart} • Vehicle ${activeDay.vehicleNumber}`;
+    renderStops();
+    renderCurrentSummary();
+    renderHistory();
+  }
+
+  function renderStops() {
+    const stops = activeDay?.stops || [];
+    els.noStops.classList.toggle('hidden', stops.length > 0);
+    els.stopsList.innerHTML = stops.map(stop => {
+      const mins = durationMinutes(stop.arrivalTime, stop.departureTime) || 0;
+      return `
+        <div class="stop-card">
+          <div class="stop-top">
+            <div>
+              <div class="stop-title">Stop ${stop.stopNumber}: ${escapeHtml(stop.activityType)}</div>
+              <div class="stop-meta">${escapeHtml(stop.arrivalTime)}–${escapeHtml(stop.departureTime)} • ${escapeHtml(stop.location)}</div>
+            </div>
+            <div class="duration-badge">${formatDuration(mins)}</div>
+          </div>
+          ${stop.notes ? `<div class="stop-notes">${escapeHtml(stop.notes)}</div>` : ''}
+          <div class="stop-buttons">
+            <button class="secondary small" data-edit-stop="${stop.id}">Edit</button>
+            <button class="danger small" data-delete-stop="${stop.id}">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderCurrentSummary() {
+    if (!activeDay) return;
+    els.currentSummary.innerHTML = summaryHtml(calculateTotals(activeDay));
+  }
+
+  function startDay() {
+    const driverName = $('driverName').value.trim();
+    const date = $('shiftDate').value;
+    const shiftStart = $('shiftStart').value;
+    const vehicleNumber = $('vehicleNumber').value.trim();
+
+    if (!driverName || !date || !shiftStart || !vehicleNumber) {
+      showMessage('Complete driver name, date, start time, and vehicle number.', 'error');
+      return;
+    }
+
+    activeDay = {
+      id: uid(),
+      driverName,
+      date,
+      shiftStart,
+      shiftEnd: '',
+      vehicleNumber,
+      createdAt: new Date().toISOString(),
+      stops: []
+    };
+    saveProfile(driverName, vehicleNumber);
+    saveActive();
+    renderApp();
+    showMessage('Day started. Add the first stop or activity.', 'success');
+  }
+
+  function openStopDialog(stop = null) {
+    els.stopError.classList.add('hidden');
+    $('editingStopId').value = stop?.id || '';
+    $('stopDialogTitle').textContent = stop ? 'Edit Stop' : 'Add Stop';
+    $('stopNumber').value = stop?.stopNumber || ((activeDay?.stops?.length || 0) + 1);
+    $('activityType').value = stop?.activityType || '';
+    const lastStop = activeDay?.stops?.[activeDay.stops.length - 1];
+    $('arrivalTime').value = stop?.arrivalTime || lastStop?.departureTime || nowTime();
+    $('departureTime').value = stop?.departureTime || nowTime();
+    $('location').value = stop?.location || '';
+    $('notes').value = stop?.notes || '';
+    els.stopDialog.showModal();
+  }
+
+  function validateStop(candidate, editingId) {
+    if (!candidate.activityType || !candidate.arrivalTime || !candidate.departureTime || !candidate.location) {
+      return 'Complete activity type, arrival time, departure time, and location.';
+    }
+
+    const mins = durationMinutes(candidate.arrivalTime, candidate.departureTime);
+    if (mins === null || mins <= 0) return 'Departure time must be later than arrival time.';
+    if (mins > 16 * 60) return 'This stop is longer than 16 hours. Check the times.';
+
+    const others = (activeDay.stops || []).filter(s => s.id !== editingId);
+    const duplicate = others.some(s =>
+      s.arrivalTime === candidate.arrivalTime &&
+      s.departureTime === candidate.departureTime &&
+      s.activityType === candidate.activityType &&
+      s.location.trim().toLowerCase() === candidate.location.trim().toLowerCase()
+    );
+    if (duplicate) return 'This appears to be a duplicate entry.';
+
+    const candidateStart = parseMinutes(candidate.arrivalTime);
+    let candidateEnd = parseMinutes(candidate.departureTime);
+    if (candidateEnd < candidateStart) candidateEnd += 1440;
+
+    for (const stop of others) {
+      let start = parseMinutes(stop.arrivalTime);
+      let end = parseMinutes(stop.departureTime);
+      if (end < start) end += 1440;
+      const overlaps = candidateStart < end && candidateEnd > start;
+      if (overlaps) return `This time overlaps Stop ${stop.stopNumber} (${stop.arrivalTime}–${stop.departureTime}).`;
+    }
+
+    const shiftStartMin = parseMinutes(activeDay.shiftStart);
+    if (candidateStart < shiftStartMin && shiftStartMin - candidateStart < 12 * 60) {
+      return 'Arrival time cannot be before the shift start time.';
+    }
+    return '';
+  }
+
+  function saveStop() {
+    const editingId = $('editingStopId').value;
+    const candidate = {
+      id: editingId || uid(),
+      stopNumber: Number($('stopNumber').value),
+      arrivalTime: $('arrivalTime').value,
+      departureTime: $('departureTime').value,
+      location: $('location').value.trim(),
+      activityType: $('activityType').value,
+      notes: $('notes').value.trim()
+    };
+
+    const error = validateStop(candidate, editingId);
+    if (error) {
+      els.stopError.textContent = error;
+      els.stopError.classList.remove('hidden');
+      return;
+    }
+
+    if (editingId) {
+      const index = activeDay.stops.findIndex(s => s.id === editingId);
+      if (index >= 0) activeDay.stops[index] = candidate;
+    } else {
+      activeDay.stops.push(candidate);
+    }
+
+    activeDay.stops.sort((a, b) => parseMinutes(a.arrivalTime) - parseMinutes(b.arrivalTime));
+    activeDay.stops.forEach((s, i) => s.stopNumber = i + 1);
+    saveActive();
+    els.stopDialog.close();
+    renderApp();
+    showMessage(editingId ? 'Stop updated.' : 'Stop saved.', 'success');
+  }
+
+  function deleteStop(id) {
+    const stop = activeDay.stops.find(s => s.id === id);
+    if (!stop) return;
+    if (!confirm(`Delete Stop ${stop.stopNumber}?`)) return;
+    activeDay.stops = activeDay.stops.filter(s => s.id !== id);
+    activeDay.stops.forEach((s, i) => s.stopNumber = i + 1);
+    saveActive();
+    renderApp();
+  }
+
+  function openEndDay() {
+    if (!activeDay.stops.length) {
+      showMessage('Add at least one stop or activity before ending the day.', 'error');
+      return;
+    }
+    $('shiftEnd').value = nowTime();
+    els.endDayError.classList.add('hidden');
+    els.endDayDialog.showModal();
+  }
+
+  function finishDay() {
+    const shiftEnd = $('shiftEnd').value;
+    if (!shiftEnd) {
+      els.endDayError.textContent = 'Enter the end-of-shift time.';
+      els.endDayError.classList.remove('hidden');
+      return;
+    }
+    const shiftMins = durationMinutes(activeDay.shiftStart, shiftEnd);
+    if (!shiftMins || shiftMins <= 0 || shiftMins > 20 * 60) {
+      els.endDayError.textContent = 'End time must be after the start time and produce a shift under 20 hours.';
+      els.endDayError.classList.remove('hidden');
+      return;
+    }
+
+    const invalidStop = activeDay.stops.find(s => {
+      const end = parseMinutes(s.departureTime);
+      let shiftEndMin = parseMinutes(shiftEnd);
+      const shiftStartMin = parseMinutes(activeDay.shiftStart);
+      if (shiftEndMin < shiftStartMin) shiftEndMin += 1440;
+      let adjustedEnd = end;
+      if (adjustedEnd < shiftStartMin) adjustedEnd += 1440;
+      return adjustedEnd > shiftEndMin;
+    });
+    if (invalidStop) {
+      els.endDayError.textContent = `Stop ${invalidStop.stopNumber} ends after the shift end time.`;
+      els.endDayError.classList.remove('hidden');
+      return;
+    }
+
+    activeDay.shiftEnd = shiftEnd;
+    activeDay.completedAt = new Date().toISOString();
+    activeDay.totals = calculateTotals(activeDay);
+
+    const history = getHistory();
+    history.unshift(activeDay);
+    saveHistory(history);
+    selectedCompletedDay = activeDay;
+    activeDay = null;
+    saveActive();
+    els.endDayDialog.close();
+    renderApp();
+    showFinalSheet(selectedCompletedDay);
+    showMessage('Day completed and saved on this device.', 'success');
+  }
+
+  function showFinalSheet(day) {
+    selectedCompletedDay = day;
+    const totals = day.totals || calculateTotals(day);
+    const rows = (day.stops || []).map(stop => `
+      <tr>
+        <td>${stop.stopNumber}</td>
+        <td>${escapeHtml(stop.arrivalTime)}</td>
+        <td>${escapeHtml(stop.departureTime)}</td>
+        <td>${formatDuration(durationMinutes(stop.arrivalTime, stop.departureTime) || 0)}</td>
+        <td>${escapeHtml(stop.location)}</td>
+        <td>${escapeHtml(stop.activityType)}</td>
+        <td>${escapeHtml(stop.notes)}</td>
+      </tr>`).join('');
+
+    els.finalSheetContent.innerHTML = `
+      <div class="timesheet-header">
+        <div class="timesheet-title">Daily Driver Time Sheet</div>
+        <div class="timesheet-subtitle">Version 0.1</div>
+      </div>
+      <div class="details-grid">
+        <div class="detail-box"><div class="detail-label">Driver</div><div class="detail-value">${escapeHtml(day.driverName)}</div></div>
+        <div class="detail-box"><div class="detail-label">Date</div><div class="detail-value">${escapeHtml(formatDate(day.date))}</div></div>
+        <div class="detail-box"><div class="detail-label">Vehicle</div><div class="detail-value">${escapeHtml(day.vehicleNumber)}</div></div>
+        <div class="detail-box"><div class="detail-label">Shift</div><div class="detail-value">${escapeHtml(day.shiftStart)}–${escapeHtml(day.shiftEnd)}</div></div>
+      </div>
+      <div style="overflow-x:auto; margin-bottom:14px;">
+        <table>
+          <thead><tr><th>#</th><th>Arrival</th><th>Departure</th><th>Time</th><th>Location</th><th>Activity</th><th>Notes</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="summary-grid">${summaryHtml(totals)}</div>
+      ${totals.unlogged > 0 ? `<div class="notice warn" style="margin-top:12px">Unlogged shift time: ${formatDuration(totals.unlogged)}. It is included in nonproductive time.</div>` : ''}
+    `;
+    els.finalSheetCard.classList.remove('hidden');
+    els.finalSheetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderHistory() {
+    const history = getHistory();
+    els.noHistory.classList.toggle('hidden', history.length > 0);
+    els.historyList.innerHTML = history.map(day => {
+      const totals = day.totals || calculateTotals(day);
+      return `
+        <div class="history-item">
+          <div class="history-head">
+            <div>
+              <div class="history-title">${escapeHtml(day.driverName)} — ${escapeHtml(formatDate(day.date))}</div>
+              <div class="history-meta">Vehicle ${escapeHtml(day.vehicleNumber)} • ${formatDuration(totals.shift)} • ${totals.productivityPct.toFixed(1)}% productive</div>
+            </div>
+          </div>
+          <div class="history-buttons">
+            <button class="primary small" data-view-day="${day.id}">View</button>
+            <button class="danger small" data-delete-day="${day.id}">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function csvEscape(value) {
+    const s = String(value ?? '');
+    return `"${s.replaceAll('"', '""')}"`;
+  }
+
+  function dayRows(day) {
+    const totals = day.totals || calculateTotals(day);
+    return (day.stops || []).map(stop => ({
+      Driver: day.driverName,
+      Date: day.date,
+      Vehicle: day.vehicleNumber,
+      ShiftStart: day.shiftStart,
+      ShiftEnd: day.shiftEnd,
+      StopNumber: stop.stopNumber,
+      ArrivalTime: stop.arrivalTime,
+      DepartureTime: stop.departureTime,
+      DurationMinutes: durationMinutes(stop.arrivalTime, stop.departureTime) || 0,
+      Location: stop.location,
+      ActivityType: stop.activityType,
+      Notes: stop.notes,
+      TotalDrivingMinutes: totals.driving,
+      TotalLoadingUnloadingMinutes: totals.loadingUnloading,
+      TotalWaitingMinutes: totals.waiting,
+      TotalBreakLunchMinutes: totals.breakLunch,
+      TotalProductiveMinutes: totals.productive,
+      TotalNonproductiveMinutes: totals.nonproductive,
+      TotalShiftMinutes: totals.shift,
+      ProductivityPercentage: totals.productivityPct.toFixed(1)
+    }));
+  }
+
+  function downloadFile(filename, content, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportCsv(days, filename) {
+    const rows = days.flatMap(dayRows);
+    if (!rows.length) {
+      showMessage('There is no data to export.', 'error');
+      return;
+    }
+    const headers = Object.keys(rows[0]);
+    const csv = [headers.map(csvEscape).join(','), ...rows.map(row => headers.map(h => csvEscape(row[h])).join(','))].join('\n');
+    downloadFile(filename, csv, 'text/csv;charset=utf-8');
+  }
+
+  function exportJson(days, filename) {
+    if (!days.length) {
+      showMessage('There is no data to export.', 'error');
+      return;
+    }
+    downloadFile(filename, JSON.stringify(days, null, 2), 'application/json');
+  }
+
+  function safeName(value) {
+    return String(value).trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '') || 'driver';
+  }
+
+  function initResume() {
+    const saved = readJson(KEYS.active, null);
+    if (!saved) return;
+    els.resumeCard.classList.remove('hidden');
+    els.startCard.classList.add('hidden');
+    els.resumeText.textContent = `${saved.driverName} has an unfinished day from ${formatDate(saved.date)} with ${(saved.stops || []).length} saved stops.`;
+    $('resumeBtn').onclick = () => {
+      activeDay = saved;
+      els.resumeCard.classList.add('hidden');
+      renderApp();
+    };
+    $('discardActiveBtn').onclick = () => {
+      if (!confirm('Discard the unfinished day? This cannot be undone.')) return;
+      localStorage.removeItem(KEYS.active);
+      els.resumeCard.classList.add('hidden');
+      els.startCard.classList.remove('hidden');
+    };
+  }
+
+  function bindEvents() {
+    $('startDayBtn').addEventListener('click', startDay);
+    $('addStopBtn').addEventListener('click', () => openStopDialog());
+    $('footerAddStopBtn').addEventListener('click', () => openStopDialog());
+    $('saveStopBtn').addEventListener('click', saveStop);
+    $('cancelStopBtn').addEventListener('click', () => els.stopDialog.close());
+    $('viewCurrentBtn').addEventListener('click', () => {
+      els.currentSummaryCard.classList.toggle('hidden');
+      renderCurrentSummary();
+      if (!els.currentSummaryCard.classList.contains('hidden')) els.currentSummaryCard.scrollIntoView({ behavior: 'smooth' });
+    });
+    $('endDayBtn').addEventListener('click', openEndDay);
+    $('confirmEndDayBtn').addEventListener('click', finishDay);
+    $('cancelEndDayBtn').addEventListener('click', () => els.endDayDialog.close());
+    $('printBtn').addEventListener('click', () => window.print());
+    $('closeFinalBtn').addEventListener('click', () => els.finalSheetCard.classList.add('hidden'));
+
+    els.stopsList.addEventListener('click', (e) => {
+      const editId = e.target.dataset.editStop;
+      const deleteId = e.target.dataset.deleteStop;
+      if (editId) openStopDialog(activeDay.stops.find(s => s.id === editId));
+      if (deleteId) deleteStop(deleteId);
+    });
+
+    els.historyList.addEventListener('click', (e) => {
+      const history = getHistory();
+      const viewId = e.target.dataset.viewDay;
+      const deleteId = e.target.dataset.deleteDay;
+      if (viewId) {
+        const day = history.find(d => d.id === viewId);
+        if (day) showFinalSheet(day);
+      }
+      if (deleteId) {
+        const day = history.find(d => d.id === deleteId);
+        if (day && confirm(`Delete ${day.driverName}'s time sheet for ${formatDate(day.date)}?`)) {
+          saveHistory(history.filter(d => d.id !== deleteId));
+          renderHistory();
+          if (selectedCompletedDay?.id === deleteId) els.finalSheetCard.classList.add('hidden');
+        }
+      }
+    });
+
+    $('exportDayCsvBtn').addEventListener('click', () => {
+      if (!selectedCompletedDay) return;
+      exportCsv([selectedCompletedDay], `${safeName(selectedCompletedDay.driverName)}-${selectedCompletedDay.date}-timesheet.csv`);
+    });
+    $('exportDayJsonBtn').addEventListener('click', () => {
+      if (!selectedCompletedDay) return;
+      exportJson([selectedCompletedDay], `${safeName(selectedCompletedDay.driverName)}-${selectedCompletedDay.date}-timesheet.json`);
+    });
+    $('exportAllCsvBtn').addEventListener('click', () => exportCsv(getHistory(), 'driver-timesheet-history.csv'));
+    $('exportAllJsonBtn').addEventListener('click', () => exportJson(getHistory(), 'driver-timesheet-history.json'));
+    $('clearHistoryBtn').addEventListener('click', () => {
+      const history = getHistory();
+      if (!history.length) return showMessage('There is no saved history to clear.', 'info');
+      if (confirm('Clear all completed time sheets from this device? Export first if you need a backup.')) {
+        saveHistory([]);
+        els.finalSheetCard.classList.add('hidden');
+        renderHistory();
+        showMessage('History cleared.', 'success');
+      }
+    });
+  }
+
+  function init() {
+    loadProfile();
+    $('shiftDate').value = todayDate();
+    $('shiftStart').value = nowTime();
+    bindEvents();
+    initResume();
+    renderHistory();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
