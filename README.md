@@ -1,4 +1,4 @@
-# Driver Time Sheet Log — Version 1.1.1
+# Driver Time Sheet Log — Version 1.1.2
 
 GitHub Pages-compatible mobile PWA.
 
@@ -18,5 +18,14 @@ GitHub Pages-compatible mobile PWA.
 Upload all five files to the root of the existing GitHub repository and allow GitHub Pages to redeploy.
 
 
-## Version 1.1.1 fix
+## Version 1.1.2 fix
 After End Shift, the active shift dashboard and bottom navigation are hidden. The completed-shift report becomes the only primary screen until the driver closes it and returns home.
+
+
+## Version 1.1.2 changes
+
+- Removed all quick/recent location suggestion chips from activity screens.
+- Removed the suggested destination prompt from Driving.
+- Location dropdowns now show the full saved location list in a consistent order.
+- Saved addresses still appear immediately after a location is selected.
+- All Version 1.1.1 completed-shift fixes remain in place.
