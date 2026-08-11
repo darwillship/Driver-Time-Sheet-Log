@@ -65,3 +65,15 @@ Changes:
 - The Active Shift / next-step dashboard immediately moves to the top of the screen.
 - When a shift is not active, all active-shift panels, timeline, activity chooser, summary, and bottom navigation are hidden.
 - Closing the completed shift report returns to a clean new-shift setup only.
+
+
+## Version 1.2.3 - Printable PDF Report
+
+- Rebuilt the Print / Save PDF output for readability.
+- PDF uses a white business-report layout regardless of app light/dark mode.
+- Page 1 contains driver/vehicle/shift details, a compact readable activity log, and shift totals.
+- Address is placed inside the Location column to reduce table width.
+- The Shift Complete celebration is hidden in the PDF.
+- Page 2 contains the full pre-trip inspection.
+- Every pre-trip checklist item prints with its OK or Needs Attention result.
+- Pre-trip page includes driver, vehicle, inspection date/time, odometer, vehicle condition, comments, and driver acknowledgment.

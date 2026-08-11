@@ -19,7 +19,55 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 .bottom{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom))}.nav{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:7px 4px;border-radius:13px;font-size:.67rem;font-weight:800}.nav button span{display:block;font-size:1.25rem;margin-bottom:2px}.nav button.active{color:var(--green);background:color-mix(in srgb,#eaf6f0 55%,transparent)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));z-index:80;transform:translateX(-50%) translateY(18px);opacity:0;background:#1c222a;color:white;padding:12px 16px;border-radius:14px;font-weight:800;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}dialog{border:0;border-radius:24px;padding:0;width:min(94vw,680px);background:var(--card);color:var(--ink);box-shadow:0 30px 90px rgba(0,0,0,.35)}dialog::backdrop{background:rgba(8,12,18,.58)}.dialog-body{padding:20px;max-height:90vh;overflow:auto}table{width:100%;border-collapse:collapse;font-size:.73rem}th,td{border:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}th{background:var(--bg)}
 @media(min-width:620px){.grid2{grid-template-columns:1fr 1fr}.activity-grid{grid-template-columns:repeat(4,1fr)}.summary-grid{grid-template-columns:repeat(4,1fr)}}
-@media print{.appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#settingsView,#historyView{display:none!important}body{background:white;color:black}main{padding:0}.card{box-shadow:none;border:0}#reportCard{display:block!important}}
+@media print{
+  @page{size:Letter portrait;margin:.42in}
+  :root{--bg:#fff;--card:#fff;--ink:#111;--muted:#444;--line:#cfd4da}
+  html,body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#settingsView,#historyView,#pretripScreen{display:none!important}
+  main{max-width:none!important;padding:0!important;margin:0!important}
+  #reportCard{display:block!important;background:#fff!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
+  #report{color:#111!important}
+  #report *{box-shadow:none!important}
+  .celebrate{display:none!important}
+  .print-report{font-family:Arial,Helvetica,sans-serif!important;font-size:10pt!important;line-height:1.25!important}
+  .print-header{text-align:left!important;border-bottom:2px solid #111;padding-bottom:9px;margin-bottom:12px}
+  .print-header h1{font-size:19pt!important;line-height:1.1!important;margin:0 0 5px!important;color:#111!important}
+  .print-header .meta{font-size:10pt!important;color:#222!important;display:grid;grid-template-columns:1fr 1fr;gap:3px 16px}
+  .print-section-title{font-size:12pt!important;font-weight:800!important;margin:14px 0 7px!important;color:#111!important}
+  .print-activity-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:8.6pt!important}
+  .print-activity-table th,.print-activity-table td{border:1px solid #aeb5bd!important;padding:5px 5px!important;vertical-align:top!important;color:#111!important;background:#fff!important;overflow-wrap:anywhere!important}
+  .print-activity-table th{font-weight:800!important;background:#eef1f4!important}
+  .print-activity-table th:nth-child(1),.print-activity-table td:nth-child(1){width:4%}
+  .print-activity-table th:nth-child(2),.print-activity-table td:nth-child(2){width:8%}
+  .print-activity-table th:nth-child(3),.print-activity-table td:nth-child(3){width:8%}
+  .print-activity-table th:nth-child(4),.print-activity-table td:nth-child(4){width:8%}
+  .print-activity-table th:nth-child(5),.print-activity-table td:nth-child(5){width:13%}
+  .print-activity-table th:nth-child(6),.print-activity-table td:nth-child(6){width:25%}
+  .print-activity-table th:nth-child(7),.print-activity-table td:nth-child(7){width:15%}
+  .print-activity-table th:nth-child(8),.print-activity-table td:nth-child(8){width:19%}
+  .print-address{display:block;font-size:7.7pt;color:#555!important;margin-top:2px}
+  .print-summary{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin-top:12px!important}
+  .print-summary .sum{border:1px solid #aeb5bd!important;background:#fff!important;border-radius:5px!important;padding:7px!important;break-inside:avoid!important}
+  .print-summary .sum span{font-size:7.5pt!important;color:#555!important}
+  .print-summary .sum b{font-size:11pt!important;color:#111!important}
+  .barprog{display:none!important}
+  .screen-pretrip-summary{display:none!important}
+  .print-pretrip{display:block!important;break-before:page;page-break-before:always;color:#111!important}
+  .print-pretrip-header{border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px}
+  .print-pretrip-header h2{font-size:18pt!important;margin:0 0 5px!important;color:#111!important}
+  .print-pretrip-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;font-size:9.5pt;margin-bottom:12px}
+  .print-pretrip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+  .print-pretrip-group{break-inside:avoid;page-break-inside:avoid}
+  .print-pretrip-group h3{font-size:10pt!important;margin:0 0 4px!important;padding-bottom:3px;border-bottom:1px solid #777;color:#111!important}
+  .print-inspection-row{display:grid;grid-template-columns:1fr 58px 88px;gap:5px;border-bottom:1px solid #ddd;padding:3px 0;font-size:8.7pt}
+  .print-inspection-row .ok{font-weight:800;color:#15704c!important}
+  .print-inspection-row .attention{font-weight:800;color:#b52b23!important}
+  .print-comments{margin-top:12px;border:1px solid #aeb5bd;padding:8px;break-inside:avoid}
+  .print-comments strong{color:#111!important}
+  .print-signature{margin-top:12px;display:grid;grid-template-columns:2fr 1fr;gap:20px;break-inside:avoid}
+  .print-signature .line{border-top:1px solid #111;padding-top:4px;font-size:8pt;color:#444!important;margin-top:18px}
+  tr{break-inside:avoid;page-break-inside:avoid}
+}
 
 .pretrip-status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);margin:14px 0}
 .pretrip-status .left{display:flex;align-items:center;gap:12px}
@@ -60,6 +108,10 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 [data-theme="dark"] .activity.recommended{background:#152820;border-color:#316c54}
 .lunch-note{font-size:.82rem;color:var(--muted);margin-top:7px}
 
+
+.screen-pretrip-summary{display:block}
+.print-pretrip{display:none}
+.print-address{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
 </style></head><body>
 <header class="appbar"><div class="bar"><div><div class="app-title" id="greeting">Driver Time Sheet Log</div><div class="chip hidden" id="weatherChip"></div></div><div class="bar-right"><div class="chip" id="headerDate"></div></div></div></header>
 <main><div class="toast" id="toast"></div>
@@ -315,7 +367,24 @@ function renderTimeline(){if(!day)return;const l=[...day.activities].reverse();$
 function renderSummary(){if(!day)return;const t=totals(day);$('productivityBar').style.width=Math.min(100,t.pct)+'%';$('summaryText').textContent=`${t.pct.toFixed(0)}% productive so far`;$('liveSummary').innerHTML=`<div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>NONPRODUCTIVE</span><b>${fmt(t.np)}</b></div>`}
 function startDay(){const driver=$('driver').value.trim(),vehicle=$('vehicle').value,date=$('date').value,start=$('startTime').value,startingTrailer=vehicle==='Semi-Truck'?$('startingTrailer').value:'';if(!driver||!vehicle||!date||!start)return toast('Complete all shift fields');if(!pretripValid()){openPretrip(false);return}const pretrip=currentPretrip();day={id:crypto.randomUUID?.()||Date.now()+'',driver,vehicle,startingTrailer,date,start,startedAt:new Date().toISOString(),end:'',endAt:'',pretrip,currentLocation:'',resumeRoute:null,activities:[]};localStorage.removeItem(K.pretrip);write(K.profile,{driver,vehicle,startingTrailer});save();render();window.scrollTo({top:0,behavior:'smooth'});toast('Shift started')}
 function openEnd(){$('endTime').value=now();$('endError').classList.add('hidden');$('endDialog').showModal()}function finishDay(){if(cur())endCurrent(false);const end=$('endTime').value;if(!end||dur(day.start,end)<=0){$('endError').textContent='End time must be after start time.';$('endError').classList.remove('hidden');return}day.end=end;day.endAt=new Date().toISOString();day.completedAt=new Date().toISOString();day.totals=totals(day,false);const h=read(K.history,[]);h.unshift(day);write(K.history,h);selected=day;localStorage.removeItem(K.active);day=null;$('endDialog').close();render();showReport(selected,true)}
-function showReport(d,celebrate=false){selected=d;const t=d.totals||totals(d,false),rows=d.activities.map((a,i)=>`<tr><td>${i+1}</td><td>${t12(a.start)}</td><td>${t12(a.end)}</td><td>${fmt(dur(a.start,a.end))}</td><td>${esc(a.type)}</td><td>${esc(a.location)}</td><td>${esc(a.address)}</td><td>${esc(a.reason||a.trailerAction||'')}</td><td>${esc(a.notes)}</td></tr>`).join('');$('report').innerHTML=`${celebrate?`<div class="celebrate"><div class="check">✓</div><h1 style="margin-top:14px">Shift Complete</h1><p>Everything has been saved.</p></div>`:''}<div style="text-align:center"><h1>Daily Driver Time Sheet</h1><p>${esc(d.driver)} • ${esc(d.date)} • ${esc(d.vehicle)}<br>${t12(d.start)}–${t12(d.end)}</p></div>${pretripReport(d.pretrip)}<div style="overflow:auto"><table><thead><tr><th>#</th><th>Start</th><th>End</th><th>Time</th><th>Activity</th><th>Location</th><th>Address</th><th>Detail</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div><div class="barprog" style="margin-top:16px"><i style="width:${Math.min(100,t.pct)}%"></i></div><div class="summary-grid" style="margin-top:14px"><div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>PRODUCTIVITY</span><b>${t.pct.toFixed(1)}%</b></div></div>`;$('reportCard').classList.remove('hidden');if(celebrate){['resumeCard','startScreen','activeScreen','timelineView','summaryView','settingsView','historyView'].forEach(id=>$(id)?.classList.add('hidden'));$('bottomBar').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'})}else{$('reportCard').scrollIntoView({behavior:'smooth'})}}
+function showReport(d,celebrate=false){
+  selected=d;
+  const t=d.totals||totals(d,false);
+  const rows=d.activities.map((a,i)=>{
+    const detail=a.reason||a.trailerAction||'';
+    const location=`${esc(a.location||'')}${a.address?`<span class="print-address">${esc(a.address)}</span>`:''}`;
+    return`<tr><td>${i+1}</td><td>${t12(a.start)}</td><td>${t12(a.end)}</td><td>${fmt(dur(a.start,a.end))}</td><td>${esc(a.type)}</td><td>${location}</td><td>${esc(detail)}</td><td>${esc(a.notes||'')}</td></tr>`
+  }).join('');
+  $('report').innerHTML=`<div class="print-report">${celebrate?`<div class="celebrate"><div class="check">✓</div><h1 style="margin-top:14px">Shift Complete</h1><p>Everything has been saved.</p></div>`:''}<div class="print-header"><h1>Daily Driver Time Sheet</h1><div class="meta"><div><strong>Driver:</strong> ${esc(d.driver)}</div><div><strong>Date:</strong> ${esc(d.date)}</div><div><strong>Vehicle:</strong> ${esc(d.vehicle)}</div><div><strong>Shift:</strong> ${t12(d.start)} - ${t12(d.end)}</div>${d.startingTrailer?`<div><strong>Trailer:</strong> ${esc(d.startingTrailer)}</div>`:''}</div></div><div class="print-section-title">Activity Log</div><table class="print-activity-table"><thead><tr><th>#</th><th>Start</th><th>End</th><th>Time</th><th>Activity</th><th>Location / Address</th><th>Detail</th><th>Notes</th></tr></thead><tbody>${rows||`<tr><td colspan="8">No activities recorded.</td></tr>`}</tbody></table><div class="print-summary"><div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>PRODUCTIVITY</span><b>${t.pct.toFixed(1)}%</b></div></div>${pretripReport(d.pretrip)}</div>`;
+  $('reportCard').classList.remove('hidden');
+  if(celebrate){
+    ['resumeCard','startScreen','activeScreen','timelineView','summaryView','settingsView','historyView'].forEach(id=>$(id)?.classList.add('hidden'));
+    $('bottomBar').classList.add('hidden');
+    window.scrollTo({top:0,behavior:'smooth'})
+  }else{
+    $('reportCard').scrollIntoView({behavior:'smooth'})
+  }
+}
 function rowsFor(d){const t=d.totals||totals(d,false);return d.activities.map((a,i)=>({Driver:d.driver,Date:d.date,Vehicle:d.vehicle,ShiftStart:d.start,ShiftEnd:d.end,Activity:i+1,Start:a.start,End:a.end,Minutes:dur(a.start,a.end),Type:a.type,Location:a.location,Address:a.address,Reason:a.reason||'',Notes:a.notes,PreTripCompleted:d.pretrip?.completedAt||'',Odometer:d.pretrip?.odometer||'',PreTripCondition:d.pretrip?.condition||'',PreTripComments:d.pretrip?.comments||'',ProductivityPercent:t.pct.toFixed(1)}))}function dl(n,x,t){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([x],{type:t}));a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),800)}function csv(ds,n){const r=ds.flatMap(rowsFor);if(!r.length)return toast('No records');const h=Object.keys(r[0]),q=v=>`"${String(v??'').replaceAll('"','""')}"`;dl(n,[h.map(q).join(','),...r.map(x=>h.map(k=>q(x[k])).join(','))].join('\n'),'text/csv')}function json(ds,n){dl(n,JSON.stringify(ds,null,2),'application/json')}
 
 const PRETRIP_ITEMS={
@@ -426,7 +495,10 @@ function savePretrip(){
 function pretripReport(p){
   if(!p)return'';
   const issues=Object.entries(p.items||{}).filter(([,v])=>v==='attention').map(([k])=>k);
-  return`<div class="pretrip-report"><h3>Pre-Trip Inspection</h3><p><strong>Completed:</strong> ${new Date(p.completedAt).toLocaleString()}<br><strong>Odometer:</strong> ${esc(p.odometer)}<br><strong>Condition:</strong> ${p.condition==='acceptable'?'Acceptable':'Defects noted'}${issues.length?`<br><strong>Needs Attention:</strong> ${esc(issues.join(', '))}`:''}${p.comments?`<br><strong>Comments:</strong> ${esc(p.comments)}`:''}<br><strong>Driver acknowledgment:</strong> ${esc(p.signature)}</p></div>`;
+  const summary=`<div class="pretrip-report screen-pretrip-summary"><h3>Pre-Trip Inspection</h3><p><strong>Completed:</strong> ${new Date(p.completedAt).toLocaleString()}<br><strong>Odometer:</strong> ${esc(p.odometer)}<br><strong>Condition:</strong> ${p.condition==='acceptable'?'Acceptable':'Defects noted'}${issues.length?`<br><strong>Needs Attention:</strong> ${esc(issues.join(', '))}`:''}${p.comments?`<br><strong>Comments:</strong> ${esc(p.comments)}`:''}<br><strong>Driver acknowledgment:</strong> ${esc(p.signature)}</p></div>`;
+  const groups=Object.entries(PRETRIP_ITEMS).map(([group,items])=>`<div class="print-pretrip-group"><h3>${esc(group)}</h3>${items.map(name=>{const v=(p.items||{})[name]||'';return`<div class="print-inspection-row"><span>${esc(name)}</span><span class="${v==='ok'?'ok':''}">${v==='ok'?'✓ OK':''}</span><span class="${v==='attention'?'attention':''}">${v==='attention'?'⚠ Needs Attention':''}</span></div>`}).join('')}</div>`).join('');
+  const full=`<section class="print-pretrip"><div class="print-pretrip-header"><h2>Driver Pre-Trip Inspection</h2><div>Vehicle Safety Inspection Record</div></div><div class="print-pretrip-meta"><div><strong>Driver:</strong> ${esc(p.driver||'')}</div><div><strong>Vehicle:</strong> ${esc(p.vehicle||'')}</div><div><strong>Inspection:</strong> ${new Date(p.completedAt).toLocaleString()}</div><div><strong>Odometer:</strong> ${esc(p.odometer||'')}</div><div><strong>Vehicle Condition:</strong> ${p.condition==='acceptable'?'Acceptable':'Defects noted - needs attention'}</div><div><strong>Date:</strong> ${esc(p.date||'')}</div></div><div class="print-pretrip-grid">${groups}</div><div class="print-comments"><strong>Comments:</strong><br>${esc(p.comments||'No comments.')}</div><div class="print-signature"><div><div>${esc(p.signature||p.driver||'')}</div><div class="line">Driver acknowledgment</div></div><div><div>${new Date(p.completedAt).toLocaleDateString()}</div><div class="line">Date</div></div></div></section>`;
+  return summary+full;
 }
 
 function renderHistory(){const h=read(K.history,[]);$('history').innerHTML=h.length?h.map(d=>`<div class="event-body" style="margin-bottom:9px"><div class="event-title"><span>${esc(d.driver)}</span><span class="badge">${esc(d.date)}</span></div><div class="event-meta">${esc(d.vehicle)} • ${fmt((d.totals||totals(d,false)).shift)}</div><div class="actions"><button class="btn soft" data-view-report="${d.id}">View Report</button></div></div>`).join(''):'<p>No completed shifts yet.</p>';document.querySelectorAll('[data-view-report]').forEach(b=>b.onclick=()=>showReport(h.find(x=>x.id===b.dataset.viewReport)))}
