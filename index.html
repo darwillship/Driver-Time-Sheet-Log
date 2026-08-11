@@ -45,11 +45,20 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 .pretrip-report h3{margin:0 0 10px}
 @media(max-width:520px){.inspect-row{grid-template-columns:1fr}.inspect-controls{justify-content:flex-start}.inspect-btn{flex:1}}
 
+
+#pretripScreen{padding-bottom:18px}
+#pretripScreen .card:first-child{margin-top:0}
+.icon-btn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:44px;height:44px;border-radius:14px;font-size:1.15rem;font-weight:900;display:grid;place-items:center}
+
 </style></head><body>
 <header class="appbar"><div class="bar"><div><div class="app-title" id="greeting">Driver Time Sheet Log</div><div class="chip hidden" id="weatherChip"></div></div><div class="bar-right"><div class="chip" id="headerDate"></div></div></div></header>
 <main><div class="toast" id="toast"></div>
 <section class="card hidden" id="resumeCard"><div class="eyebrow">Unfinished shift</div><h2>Resume your day?</h2><p id="resumeText"></p><div class="actions grid2"><button class="btn dark" id="resumeBtn">Resume Shift</button><button class="btn danger" id="discardBtn">Discard Shift</button></div></section>
-<section class="card hero" id="startScreen"><div class="eyebrow">Welcome back</div><h1>Track the day.<br>Skip the paperwork.</h1><p>Start the shift, then log each activity with a few taps.</p><div class="stack"><div class="field"><label>Driver name</label><input class="control" id="driver" placeholder="Enter driver name" autocomplete="name"></div><div class="field"><label>Vehicle</label><select class="control" id="vehicle"><option value="">Select vehicle</option><option>McCook Van</option><option>McCook Hillside</option><option>Sterling 65</option><option>Sterling 66</option><option>International</option><option>Freightliner</option><option>Semi-Truck</option></select></div><div class="field hidden" id="trailerWrap"><label>Starting trailer</label><select class="control" id="startingTrailer"><option value="">No trailer / Bobtail</option><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div><div class="grid2"><div class="field"><label>Date</label><input class="control" id="date" type="date"></div><div class="field"><label>Start time</label><input class="control" id="startTime" type="time"></div></div></div><div id="pretripStatus" class="pretrip-status"></div><div class="actions"><button class="btn primary" id="startBtn">Start Shift</button></div></section>
+<section class="card hero" id="startScreen"><div class="eyebrow">Welcome back</div><h1>Track the day.<br>Skip the paperwork.</h1><p>Start the shift, then log each activity with a few taps.</p><div class="stack"><div class="field"><label>Driver name</label><input class="control" id="driver" placeholder="Enter driver name" autocomplete="name"></div><div class="field"><label>Vehicle</label><select class="control" id="vehicle"><option value="">Select vehicle</option><option>McCook Van</option><option>McCook Hillside</option><option>Sterling 65</option><option>Sterling 66</option><option>International</option><option>Freightliner</option><option>Semi-Truck</option></select></div><div class="field hidden" id="trailerWrap"><label>Starting trailer</label><select class="control" id="startingTrailer"><option value="">No trailer / Bobtail</option><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div><div class="grid2"><div class="field"><label>Date</label><input class="control" id="date" type="date"></div><div class="field"><label>Start time</label><input class="control" id="startTime" type="time"></div></div></div><div id="pretripStatus" class="pretrip-status"></div>
+<div class="actions">
+  <button class="btn primary" id="pretripBtn">Continue to Pre-Trip</button>
+  <button class="btn primary hidden" id="startBtn">Start Shift</button>
+</div></section>
 <section class="hidden" id="activeScreen"><section class="card"><div class="profile"><div class="person"><div class="avatar" id="avatarBox">👤</div><div><b id="driverLine"></b><small id="shiftLine"></small></div></div><div class="live">SHIFT ACTIVE</div></div><div class="current"><div class="ring"><svg viewBox="0 0 188 188"><circle class="track" cx="94" cy="94" r="82"></circle><circle class="fill" id="ringFill" cx="94" cy="94" r="82"></circle></svg><div class="ring-content"><div class="current-icon" id="currentIcon">＋</div><div class="current-name" id="currentName">No Activity</div><div class="clock" id="timer">00:00</div></div></div><div class="sub" id="startedLine">Select an activity when work begins.</div></div><div id="mainControls"></div><div class="metrics"><div class="metric"><b id="shiftMetric">0m</b><span>SHIFT</span></div><div class="metric"><b id="productiveMetric">0m</b><span>PRODUCTIVE</span></div><div class="metric"><b id="waitingMetric">0m</b><span>WAITING</span></div></div></section><section class="card hidden" id="activityCard"><div class="eyebrow">New entry</div><h2>Start Activity</h2><div class="activity-grid" id="activityGrid"></div><div class="actions"><button class="btn soft" id="cancelActivity">Cancel</button></div></section><section class="card hidden" id="detailsCard"><div class="eyebrow">Activity details</div><h2 id="detailsTitle">Details</h2><div id="detailsContent"></div></section></section>
 <section id="timelineView" class="hidden"><section class="card"><div class="eyebrow">Today</div><h2>Activity Timeline</h2><div id="timeline"></div></section></section>
 <section id="summaryView" class="hidden"><section class="card"><div class="eyebrow">Live summary</div><h2>Today at a glance</h2><div class="barprog"><i id="productivityBar" style="width:0%"></i></div><p id="summaryText" style="margin-top:8px"></p><div class="summary-grid" id="liveSummary"></div></section></section>
@@ -57,16 +66,20 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 <section id="settingsView" class="hidden"><section class="card"><div class="eyebrow">Personalize</div><h2>Settings</h2><div class="stack"><div class="field"><label>Driver photo</label><input class="control" id="avatarInput" type="file" accept="image/*"></div><div class="field"><label>Appearance</label><select class="control" id="themeSelect"><option value="system">Use phone setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div><button class="btn soft" id="weatherBtn">Enable Local Weather</button><p style="font-size:.8rem">Weather is optional and only requests location when you enable it.</p></div></section></section>
 <section class="card hidden" id="reportCard"><div id="report"></div><div class="actions no-print"><button class="btn dark" onclick="print()">Print / Save PDF</button><button class="btn soft" id="csvDay">Export CSV</button><button class="btn soft" id="jsonDay">Export JSON</button><button class="btn soft" id="closeReport">Close</button></div></section>
 
-<section class="overlay hidden" id="pretripOverlay" aria-hidden="true">
-  <div class="sheet">
-    <div class="sheet-head">
-      <div>
-        <div class="eyebrow">REQUIRED BEFORE SHIFT</div>
-        <h2 style="margin:4px 0 0">Pre-Trip Inspection</h2>
-      </div>
-      <button class="icon-btn" id="closePretrip" aria-label="Close">✕</button>
-    </div>
 
+<section class="hidden" id="pretripScreen">
+  <section class="card">
+    <div class="eyebrow">Required Before Shift</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div>
+        <h1 style="margin-bottom:6px">Pre-Trip Inspection</h1>
+        <p style="margin-bottom:0">Complete the vehicle inspection before starting the shift.</p>
+      </div>
+      <button class="icon-btn" id="closePretrip" aria-label="Back" style="flex:0 0 auto">←</button>
+    </div>
+  </section>
+
+  <section class="card">
     <div class="grid2">
       <div class="field"><label>Driver</label><input class="control" id="ptDriver" readonly></div>
       <div class="field"><label>Vehicle</label><input class="control" id="ptVehicle" readonly></div>
@@ -75,20 +88,23 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
       <div class="field"><label>Inspection Date & Time</label><input class="control" id="ptDateTime" readonly></div>
       <div class="field"><label>Odometer</label><input class="control" id="ptOdometer" inputmode="numeric" placeholder="Enter odometer"></div>
     </div>
+  </section>
 
+  <section class="card">
     <div class="pretrip-top-actions">
       <button class="btn soft" id="markAllOk">✓ Mark All OK</button>
       <button class="btn soft" id="clearPretrip">Clear</button>
     </div>
-    <p class="pretrip-note">Review the vehicle first. “Mark All OK” fills the checklist, then you can change any item that needs attention.</p>
+    <p class="pretrip-note">Inspect the vehicle first. “Mark All OK” fills the checklist, then change any item that needs attention.</p>
     <div id="pretripMessage"></div>
     <div class="pretrip-list" id="pretripList"></div>
+  </section>
 
-    <div class="field" style="margin-top:18px">
+  <section class="card">
+    <div class="field">
       <label>Comments</label>
       <textarea class="control" id="ptComments" placeholder="Required when anything needs attention"></textarea>
     </div>
-
     <div class="field">
       <label>Vehicle Condition</label>
       <select class="control" id="ptCondition">
@@ -97,15 +113,17 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
         <option value="defects">Defects noted — vehicle needs attention</option>
       </select>
     </div>
-
     <div class="field">
       <label>Driver Acknowledgment</label>
       <input class="control" id="ptSignature" placeholder="Type full name">
     </div>
-
-    <button class="btn primary" id="completePretrip">Complete Pre-Trip</button>
-  </div>
+    <div class="actions">
+      <button class="btn primary" id="completePretrip">Complete Pre-Trip</button>
+      <button class="btn soft" id="cancelPretrip">Back</button>
+    </div>
+  </section>
 </section>
+
 
 </main>
 <div class="bottom hidden" id="bottomBar"><div class="nav"><button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="timeline"><span>≡</span>Timeline</button><button data-view="summary"><span>◔</span>Summary</button><button data-view="settings"><span>⚙</span>Settings</button></div></div>
@@ -121,7 +139,7 @@ function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setT
 function totals(d,live=true){const shift=dur(d.start,d.end||(live?now():d.start));let p=0,w=0,l=0,drive=0;for(const a of d.activities){const n=a.end?dur(a.start,a.end):(live?Math.floor(secs(a)/60):0);if(productive.has(a.type))p+=n;if(a.type==='Waiting')w+=n;if(a.type==='Lunch')l+=n;if(a.type==='Driving')drive+=n}return{shift,p,w,l,drive,np:Math.max(0,shift-p),pct:shift?p/shift*100:0}}
 function greeting(){const h=new Date().getHours(),name=(day?.driver||$('driver').value||read(K.profile,{}).driver||'').split(' ')[0];$('greeting').textContent=`Good ${h<12?'Morning':h<17?'Afternoon':'Evening'}${name?', '+name:''}`}
 function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='settings')$('settingsView').classList.remove('hidden')}
-function render(){const active=!!day;$('startScreen').classList.toggle('hidden',active);$('bottomBar').classList.toggle('hidden',!active);if(active){show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}greeting();renderHistory()}
+function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');$('startScreen').classList.toggle('hidden',active);$('bottomBar').classList.toggle('hidden',!active);if(active){show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}greeting();renderHistory()}
 function updateRing(){if(!day)return;const t=totals(day),target=480,circ=2*Math.PI*82,p=Math.min(1,t.shift/target);$('ringFill').style.strokeDasharray=circ;$('ringFill').style.strokeDashoffset=circ*(1-p)}
 function renderCurrent(){if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c){$('currentIcon').textContent=icon(c.type);$('currentName').textContent=c.type;$('timer').textContent=clock(secs(c));$('startedLine').textContent=`Started ${t12(c.start)}${c.location?' • '+c.location:''}`;$('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="finish">Finish ${esc(c.type)}</button><button class="btn soft" id="switch">Finish & Start Another</button><button class="btn danger" id="endShift">End Shift</button></div>`;$('finish').onclick=()=>{endCurrent();toast('Activity finished')};$('switch').onclick=()=>{endCurrent();openActivities()};$('endShift').onclick=openEnd}else{$('currentIcon').textContent='＋';$('currentName').textContent='No Activity';$('timer').textContent='00:00';$('startedLine').textContent='Select an activity when work begins.';$('mainControls').innerHTML=`<div class="actions"><button class="btn primary" id="startAct">Start Activity</button><button class="btn danger" id="endShift">End Shift</button></div>`;$('startAct').onclick=openActivities;$('endShift').onclick=openEnd}}
 function openActivities(){$('activityCard').classList.remove('hidden');$('detailsCard').classList.add('hidden');$('activityGrid').innerHTML=defs.filter(d=>d[0]!=='Drop & Hook'||day.vehicle==='Semi-Truck').map(d=>`<button class="activity" data-type="${d[0]}"><div class="ico">${d[1]}</div><b>${d[0]}</b><small>${d[2]}</small></button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>openDetails(b.dataset.type));$('activityCard').scrollIntoView({behavior:'smooth',block:'start'})}
@@ -155,15 +173,18 @@ function pretripValid(){
 }
 function renderPretripStatus(){
   const host=$('pretripStatus');if(!host)return;
-  const p=currentPretrip(),valid=pretripValid();
+  const valid=pretripValid(),p=currentPretrip();
   if(valid){
     host.classList.add('done');
-    host.innerHTML=`<div class="left"><div class="pretrip-badge">✓</div><div><strong>Pre-Trip Complete</strong><small>${t12(new Date(p.completedAt).toTimeString().slice(0,5))} · ${esc(p.vehicle)}</small></div></div><button class="btn soft" id="viewPretrip" style="padding:10px 12px">View</button>`;
+    host.innerHTML=`<div class="left"><div class="pretrip-badge">✓</div><div><strong>Pre-Trip Complete</strong><small>${new Date(p.completedAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})} · ${esc(p.vehicle)}</small></div></div><button class="btn soft" id="viewPretrip" style="padding:10px 12px">View</button>`;
     $('viewPretrip').onclick=()=>openPretrip(true);
+    $('pretripBtn')?.classList.add('hidden');
+    $('startBtn')?.classList.remove('hidden');
   }else{
     host.classList.remove('done');
-    host.innerHTML=`<div class="left"><div class="pretrip-badge">🛠️</div><div><strong>Pre-Trip Required</strong><small>Complete the vehicle inspection before starting.</small></div></div><button class="btn soft" id="inspectPretrip" style="padding:10px 12px">Inspect</button>`;
-    $('inspectPretrip').onclick=()=>openPretrip(false);
+    host.innerHTML=`<div class="left"><div class="pretrip-badge">🛠️</div><div><strong>Pre-Trip Required</strong><small>Complete inspection before Start Shift becomes available.</small></div></div>`;
+    $('pretripBtn')?.classList.remove('hidden');
+    $('startBtn')?.classList.add('hidden');
   }
 }
 function buildPretripList(readonly=false){
@@ -190,13 +211,25 @@ function openPretrip(readonly=false){
   ['ptOdometer','ptComments','ptCondition','ptSignature'].forEach(id=>$(id).disabled=readonly);
   $('markAllOk').classList.toggle('hidden',readonly);$('clearPretrip').classList.toggle('hidden',readonly);$('completePretrip').classList.toggle('hidden',readonly);
   $('pretripMessage').innerHTML=readonly?`<div class="pretrip-success">Inspection completed and saved.</div>`:'';
-  buildPretripList(readonly);$('pretripOverlay').classList.remove('hidden');$('pretripOverlay').setAttribute('aria-hidden','false');
+  buildPretripList(readonly);
+  $('startScreen').classList.add('hidden');
+  $('resumeCard')?.classList.add('hidden');
+  $('pretripScreen').classList.remove('hidden');
+  $('bottomBar').classList.add('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function closePretrip(){$('pretripOverlay').classList.add('hidden');$('pretripOverlay').setAttribute('aria-hidden','true')}
+function closePretrip(){$('pretripScreen').classList.add('hidden');$('startScreen').classList.remove('hidden');renderPretripStatus();window.scrollTo({top:0,behavior:'smooth'})}
 function savePretrip(){
-  pretripDraft.odometer=$('ptOdometer').value.trim();pretripDraft.comments=$('ptComments').value.trim();pretripDraft.condition=$('ptCondition').value;pretripDraft.signature=$('ptSignature').value.trim();
-  const names=Object.values(PRETRIP_ITEMS).flat(),missing=names.filter(n=>!pretripDraft.items[n]),issues=names.filter(n=>pretripDraft.items[n]==='attention');
+  pretripDraft.odometer=$('ptOdometer').value.trim();
+  pretripDraft.comments=$('ptComments').value.trim();
+  pretripDraft.condition=$('ptCondition').value;
+  pretripDraft.signature=$('ptSignature').value.trim();
+
+  const names=Object.values(PRETRIP_ITEMS).flat();
+  const missing=names.filter(n=>!pretripDraft.items[n]);
+  const issues=names.filter(n=>pretripDraft.items[n]==='attention');
   let err='';
+
   if(!pretripDraft.odometer)err='Enter the odometer reading.';
   else if(missing.length)err=`Review every inspection item. ${missing.length} item${missing.length===1?' is':'s are'} not marked.`;
   else if(issues.length&&!pretripDraft.comments)err='Add comments describing the item(s) that need attention.';
@@ -204,9 +237,29 @@ function savePretrip(){
   else if(issues.length&&pretripDraft.condition!=='defects')err='Needs Attention items require the defects condition.';
   else if(!issues.length&&pretripDraft.condition!=='acceptable')err='With all items OK, select that the vehicle condition is acceptable.';
   else if(!pretripDraft.signature)err='Enter the driver acknowledgment.';
-  if(err){$('pretripMessage').innerHTML=`<div class="pretrip-alert">${esc(err)}</div>`;return}
-  const rec={...pretripDraft,driver:$('driver').value.trim(),vehicle:$('vehicle').value,date:$('date').value,completedAt:new Date().toISOString()};
-  write(K.pretrip,rec);renderPretripStatus();closePretrip();toast('Pre-trip completed');
+
+  if(err){
+    $('pretripMessage').innerHTML=`<div class="pretrip-alert">${esc(err)}</div>`;
+    $('pretripMessage').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  const rec={
+    ...pretripDraft,
+    driver:$('driver').value.trim(),
+    vehicle:$('vehicle').value,
+    date:$('date').value,
+    completedAt:new Date().toISOString()
+  };
+  write(K.pretrip,rec);
+  $('pretripMessage').innerHTML=`<div class="pretrip-success">✓ Pre-trip completed successfully.</div>`;
+  toast('Pre-trip completed');
+  setTimeout(()=>{
+    $('pretripScreen').classList.add('hidden');
+    $('startScreen').classList.remove('hidden');
+    renderPretripStatus();
+    window.scrollTo({top:0,behavior:'smooth'});
+  },350);
 }
 function pretripReport(p){
   if(!p)return'';
@@ -216,6 +269,6 @@ function pretripReport(p){
 
 function renderHistory(){const h=read(K.history,[]);$('history').innerHTML=h.length?h.map(d=>`<div class="event-body" style="margin-bottom:9px"><div class="event-title"><span>${esc(d.driver)}</span><span class="badge">${esc(d.date)}</span></div><div class="event-meta">${esc(d.vehicle)} • ${fmt((d.totals||totals(d,false)).shift)}</div><div class="actions"><button class="btn soft" data-view-report="${d.id}">View Report</button></div></div>`).join(''):'<p>No completed shifts yet.</p>';document.querySelectorAll('[data-view-report]').forEach(b=>b.onclick=()=>showReport(h.find(x=>x.id===b.dataset.viewReport)))}
 async function weather(){if(!navigator.geolocation)return toast('Location not supported');navigator.geolocation.getCurrentPosition(async p=>{try{const u=`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit`;const j=await fetch(u).then(r=>r.json()),temp=Math.round(j.current.temperature_2m);write(K.weather,{temp,at:Date.now()});showWeather();toast('Weather enabled')}catch{toast('Weather unavailable')}},()=>toast('Location permission was not granted'),{enableHighAccuracy:false,timeout:8000})}function showWeather(){const w=read(K.weather,null);if(w&&Date.now()-w.at<6*3600000){$('weatherChip').textContent=`☀️ ${w.temp}°F`;$('weatherChip').classList.remove('hidden')}}
-function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>{$('activityCard').classList.add('hidden')};document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();show('home');window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){localStorage.removeItem(K.active);location.reload()}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c)$('timer').textContent=clock(secs(c));if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('pretripBtn').onclick=()=>openPretrip(false);$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('cancelPretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>{$('activityCard').classList.add('hidden')};document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();show('home');window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){localStorage.removeItem(K.active);location.reload()}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c)$('timer').textContent=clock(secs(c));if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 init();})();
 </script></body></html>

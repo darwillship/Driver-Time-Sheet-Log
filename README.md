@@ -32,3 +32,12 @@ Changes:
 - Location dropdowns remain, with the saved address shown after selection.
 - After End Shift, the active dashboard/navigation are hidden and only Shift Complete + the final report are shown.
 - Original Version 1.1 design and activity workflow otherwise remain unchanged.
+
+
+## Version 1.1.4
+
+- Pre-Trip Inspection is now a completely separate screen.
+- Start Shift is hidden until the pre-trip is successfully completed.
+- Complete Pre-Trip now validates the form, saves it, returns to the shift setup screen, and displays Pre-Trip Complete.
+- Back buttons return to shift setup without starting the shift.
+- The Version 1.1 interface and all previously approved fixes remain unchanged.
