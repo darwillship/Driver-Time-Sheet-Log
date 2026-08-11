@@ -1,48 +1,18 @@
-# Driver Time Sheet Log — Version 1.0
+# Driver Time Sheet Log — Version 1.1
 
-A mobile-first Progressive Web App for recording a driver's workday.
+GitHub Pages-compatible mobile PWA.
 
-## Main workflow
+## Highlights
+- Dynamic greeting
+- Live shift progress ring
+- Optional local weather
+- Driver photo stored on device
+- Automatic light/dark mode
+- Recent-location shortcuts and destination suggestion
+- Bottom navigation: Home, Timeline, Summary, Settings
+- Animated activity feedback and haptics
+- End-of-shift completion screen
+- Local device history, CSV/JSON export, print/PDF, offline support
 
-1. Select driver and vehicle.
-2. Start the shift. No activity starts automatically.
-3. Tap **Start Activity** and choose the actual task.
-4. Finish the activity or finish it and immediately start another.
-5. End the shift, review the report, print/save PDF, or export CSV/JSON.
-
-## Included
-
-- Modern app-style mobile interface
-- Driving, loading, unloading, waiting, fueling, lunch, vehicle issue, other
-- Drop-and-hook tools for the semi-truck
-- Vendor and postal location list with addresses
-- Local device backup and resume
-- Completed shift history
-- CSV and JSON exports
-- Printable daily time sheet
-- Offline support after first load
-
-## GitHub Pages
-
-Upload all files to the repository root. GitHub Pages should deploy from the `main` branch and `/ (root)` folder.
-
-
-## Version 1.0.3 fix
-
-- Fixed page jumping to the top while scrolling.
-- Fixed notes fields losing focus while typing.
-- Fixed dropdown menus closing or resetting while scrolling.
-- Live timers now update without rebuilding the active screen every second.
-
-
-## Version 1.0.3 fix
-
-- Fixed frozen live activity timer.
-- Live timer now displays minutes and seconds, then hours when needed.
-- Preserves the scrolling, dropdown, and notes-field focus fixes from Version 1.0.1.
-
-
-## Version 1.0.3
-- Displays the saved street address immediately after a customer/location is selected.
-- Shows separate origin and destination addresses for Driving.
-- Includes the address in the activity timeline.
+## Install
+Upload all five files to the root of the existing GitHub repository and allow GitHub Pages to redeploy.

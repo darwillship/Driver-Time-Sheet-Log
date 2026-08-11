@@ -1,1 +1,17 @@
-{"name":"Driver Time Sheet Log","short_name":"Driver Log","start_url":"./","display":"standalone","background_color":"#f5f6f8","theme_color":"#f7f8fa","description":"Mobile driver activity and time sheet log.","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "Driver Time Sheet Log",
+  "short_name": "Driver Log",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f7f8fa",
+  "description": "Mobile driver activity and time sheet log.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
