@@ -41,3 +41,18 @@ Changes:
 - Complete Pre-Trip now validates the form, saves it, returns to the shift setup screen, and displays Pre-Trip Complete.
 - Back buttons return to shift setup without starting the shift.
 - The Version 1.1 interface and all previously approved fixes remain unchanged.
+
+
+## Version 1.2.1 — Guided Driver Workflow
+
+- Keeps the Version 1.1 visual design and the separate pre-trip screen.
+- Driving now uses an Arrived button instead of a generic Finish Driving button.
+- Arrival automatically carries the destination into the next step.
+- Darwill McCook/Hillside prioritize Loading, Unloading, Waiting, then Driving.
+- Vendors prioritize Pickup, Delivery, Waiting, then Driving.
+- Post offices prioritize Delivery, Unloading, Waiting, then Driving.
+- Added productive Pickup and Delivery activities.
+- Finishing an activity shows the most likely next actions at the same location instead of returning to the full activity menu.
+- Fuel Stop is available while driving. Done Fueling automatically resumes the same route.
+- Lunch uses a 30-minute countdown. It does not falsify the record by auto-ending; the driver taps End Lunch when actually finished.
+- Location and route context carry forward so drivers do not repeatedly select the same information.

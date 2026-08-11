@@ -50,6 +50,16 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 #pretripScreen .card:first-child{margin-top:0}
 .icon-btn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:44px;height:44px;border-radius:14px;font-size:1.15rem;font-weight:900;display:grid;place-items:center}
 
+
+.context-card{padding:13px 14px;border:1px solid var(--line);border-radius:15px;background:var(--soft);margin-bottom:14px}
+.context-card strong{display:block;font-size:.95rem}
+.context-card small{display:block;color:var(--muted);margin-top:4px;line-height:1.35}
+.guided-title{margin-bottom:6px}
+.guided-sub{color:var(--muted);margin:-2px 0 16px}
+.activity.recommended{border-color:#8fd1b3;background:#edf9f3;box-shadow:0 8px 22px rgba(20,122,80,.08)}
+[data-theme="dark"] .activity.recommended{background:#152820;border-color:#316c54}
+.lunch-note{font-size:.82rem;color:var(--muted);margin-top:7px}
+
 </style></head><body>
 <header class="appbar"><div class="bar"><div><div class="app-title" id="greeting">Driver Time Sheet Log</div><div class="chip hidden" id="weatherChip"></div></div><div class="bar-right"><div class="chip" id="headerDate"></div></div></div></header>
 <main><div class="toast" id="toast"></div>
@@ -132,7 +142,7 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 (()=>{'use strict';
 const $=id=>document.getElementById(id),K={active:'dt-v11-active',history:'dt-v11-history',profile:'dt-v11-profile',recent:'dt-v11-recent',theme:'dt-v11-theme',avatar:'dt-v11-avatar',weather:'dt-v11-weather',pretrip:'dt-v11-pretrip-pending'};
 const places=[['ALG','1053 N Schmidt Rd, Romeoville, IL 60446'],['ENRU','1000 Windham Pkwy, Bolingbrook, IL 60490'],['Darwill Hillside','11900 Roosevelt Rd, Hillside, IL 60162'],['Darwill McCook','8701 47th St Ste C, McCook, IL 60525'],['South Suburban Post Office','6801 W 73rd St, Bedford Park, IL 60499'],['Fox Valley Post Office','3900 Gabrielle Ln, Aurora, IL 60598'],['Carol Stream Post Office','550 E Fullerton Ave, Carol Stream, IL 60188'],['Worth Post Office','11114 S Harlem Ave, Worth, IL 60482'],['Bolingbrook Post Office','105 Canterbury Ln, Bolingbrook, IL 60440'],['Darwill Oakbrook Tower Terrace','1 Tower Ln, Oakbrook Terrace, IL 60181'],['Envelopes Only','2000 S Park Ave, Streamwood, IL 60107'],['Federal Envelope','608 Country Club Dr, Bensenville, IL 60106'],['Universal Laminating','910 Carlow Dr Ste A, Bolingbrook, IL 60490'],['Platinum Converting','1560 W Stearns Rd, Bartlett, IL 60103'],['Victor Envelope','301 Arthur Ct, Bensenville, IL 60106'],['Supremex Naperville','1500 Shore Rd, Naperville, IL 60563'],['Supremex Chicago','4114 S Peoria St, Chicago, IL 60609']];
-const defs=[['Driving','🚚','Travel between locations'],['Loading','📦','Loading vehicle or trailer'],['Unloading','📥','Unloading at a stop'],['Waiting','⏳','Waiting for access or service'],['Fueling','⛽','Fuel stop'],['Lunch','🍽️','30-minute lunch'],['Drop & Hook','🔁','Hook, drop, or swap trailer'],['Vehicle issue','🔧','Mechanical or vehicle problem'],['Other','•••','Another work activity']],productive=new Set(['Driving','Loading','Unloading','Fueling','Drop & Hook']);let day=null,selected=null,pending='';
+const defs=[['Driving','🚚','Travel between locations'],['Loading','📦','Loading vehicle or trailer'],['Unloading','📥','Unloading at a stop'],['Pickup','⬆️','Picking up material'],['Delivery','⬇️','Delivering material'],['Waiting','⏳','Waiting for access or service'],['Fueling','⛽','Fuel stop'],['Lunch','🍽️','30-minute lunch'],['Drop & Hook','🔁','Hook, drop, or swap trailer'],['Vehicle issue','🔧','Mechanical or vehicle problem'],['Other','•••','Another work activity']],productive=new Set(['Driving','Loading','Unloading','Pickup','Delivery','Fueling','Drop & Hook']);let day=null,selected=null,pending='';
 const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),now=()=>new Date().toTimeString().slice(0,5),today=()=>new Date().toISOString().slice(0,10),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b},dur=(a,b)=>{let d=mins(b)-mins(a);return d<0?d+1440:d},fmt=n=>`${Math.floor(n/60)?Math.floor(n/60)+'h ':''}${Math.floor(n%60)}m`,t12=t=>{if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`},icon=t=>defs.find(x=>x[0]===t)?.[1]||'•';
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1700);navigator.vibrate?.(18)}function save(){if(day)write(K.active,day)}function cur(){return day?.activities.find(a=>!a.end)||null}function secs(a){return Math.max(0,Math.floor((Date.now()-new Date(a.startedAt).getTime())/1000))}function clock(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`}
@@ -141,17 +151,169 @@ function greeting(){const h=new Date().getHours(),name=(day?.driver||$('driver')
 function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='settings')$('settingsView').classList.remove('hidden')}
 function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');$('startScreen').classList.toggle('hidden',active);$('bottomBar').classList.toggle('hidden',!active);if(active){show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}greeting();renderHistory()}
 function updateRing(){if(!day)return;const t=totals(day),target=480,circ=2*Math.PI*82,p=Math.min(1,t.shift/target);$('ringFill').style.strokeDasharray=circ;$('ringFill').style.strokeDashoffset=circ*(1-p)}
-function renderCurrent(){if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c){$('currentIcon').textContent=icon(c.type);$('currentName').textContent=c.type;$('timer').textContent=clock(secs(c));$('startedLine').textContent=`Started ${t12(c.start)}${c.location?' • '+c.location:''}`;$('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="finish">Finish ${esc(c.type)}</button><button class="btn soft" id="switch">Finish & Start Another</button><button class="btn danger" id="endShift">End Shift</button></div>`;$('finish').onclick=()=>{endCurrent();toast('Activity finished')};$('switch').onclick=()=>{endCurrent();openActivities()};$('endShift').onclick=openEnd}else{$('currentIcon').textContent='＋';$('currentName').textContent='No Activity';$('timer').textContent='00:00';$('startedLine').textContent='Select an activity when work begins.';$('mainControls').innerHTML=`<div class="actions"><button class="btn primary" id="startAct">Start Activity</button><button class="btn danger" id="endShift">End Shift</button></div>`;$('startAct').onclick=openActivities;$('endShift').onclick=openEnd}}
-function openActivities(){$('activityCard').classList.remove('hidden');$('detailsCard').classList.add('hidden');$('activityGrid').innerHTML=defs.filter(d=>d[0]!=='Drop & Hook'||day.vehicle==='Semi-Truck').map(d=>`<button class="activity" data-type="${d[0]}"><div class="ico">${d[1]}</div><b>${d[0]}</b><small>${d[2]}</small></button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>openDetails(b.dataset.type));$('activityCard').scrollIntoView({behavior:'smooth',block:'start'})}
+
+function locationKind(n){
+  if(['Darwill McCook','Darwill Hillside'].includes(n))return'darwill';
+  if(String(n||'').includes('Post Office'))return'postoffice';
+  return n?'vendor':'';
+}
+function contextActions(location,lastType=''){
+  const kind=locationKind(location);
+  let a=kind==='darwill'?['Loading','Unloading','Waiting','Driving']:
+        kind==='postoffice'?['Delivery','Unloading','Waiting','Driving']:
+        ['Pickup','Delivery','Waiting','Driving'];
+  if(lastType==='Waiting')a=a.filter(x=>x!=='Waiting');
+  if(['Loading','Unloading','Pickup','Delivery','Drop & Hook'].includes(lastType)){
+    a=['Driving',...a.filter(x=>x!=='Driving'&&x!==lastType)];
+  }
+  return a;
+}
+function activityButton(type,recommended=false){
+  const d=defs.find(x=>x[0]===type)||[type,'•',''];
+  return`<button class="activity ${recommended?'recommended':''}" data-type="${esc(type)}"><div class="ico">${d[1]}</div><b>${esc(type)}</b><small>${d[2]}</small></button>`;
+}
+function hideActivityPanels(){$('activityCard').classList.add('hidden');$('detailsCard').classList.add('hidden')}
+function showNextActions(location,lastType=''){
+  if(!day)return;
+  const card=$('activityCard'),ey=card.querySelector('.eyebrow'),title=card.querySelector('h2');
+  ey.textContent=location?'CURRENT LOCATION':'NEXT STEP';
+  title.textContent=location?`What’s next at ${location}?`:'What’s next?';
+  const acts=location?contextActions(location,lastType):defs.map(d=>d[0]).filter(x=>x!=='Drop & Hook'||day.vehicle==='Semi-Truck');
+  $('activityGrid').innerHTML=acts.map((x,i)=>activityButton(x,i===0)).join('');
+  $('activityGrid').insertAdjacentHTML('beforeend',`${activityButton('Lunch')}${activityButton('Fueling')}`);
+  if(day.vehicle==='Semi-Truck'&&location&&!acts.includes('Drop & Hook'))$('activityGrid').insertAdjacentHTML('beforeend',activityButton('Drop & Hook'));
+  card.classList.remove('hidden');$('detailsCard').classList.add('hidden');
+  document.querySelectorAll('#activityGrid .activity').forEach(b=>b.onclick=()=>{
+    const type=b.dataset.type;
+    if(type==='Driving')openDetails('Driving',location);
+    else if(type==='Lunch'){startActivity('Lunch',location||'',location?pdata(location)[1]:'','',{contextLocation:location||''});hideActivityPanels();toast('Lunch started')}
+    else if(type==='Fueling'){startActivity('Fueling',location||'',location?pdata(location)[1]:'','',{contextLocation:location||''});hideActivityPanels();toast('Fueling started')}
+    else openDetails(type,location);
+  });
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderCurrent(){
+  if(!day)return;
+  const c=cur(),t=totals(day);
+  $('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();
+  if(c){
+    $('currentIcon').textContent=icon(c.type);$('currentName').textContent=c.type;
+    if(c.type==='Lunch'){
+      const elapsed=secs(c),remaining=Math.max(0,1800-elapsed);
+      $('timer').textContent=remaining?clock(remaining):'30:00+';
+      $('startedLine').textContent=remaining?`Lunch ends in ${clock(remaining)} • Started ${t12(c.start)}`:`30 minutes reached • Started ${t12(c.start)}`;
+      $('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="finish">End Lunch</button><button class="btn danger" id="endShift">End Shift</button></div>`;
+      $('finish').onclick=()=>finishGuided(c);$('endShift').onclick=openEnd;
+    }else if(c.type==='Driving'){
+      $('timer').textContent=clock(secs(c));$('startedLine').textContent=`Started ${t12(c.start)}${c.location?' • '+c.location:''}`;
+      $('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="arrived">Arrived</button><button class="btn soft" id="fuelStop">Fuel Stop</button><button class="btn danger" id="endShift">End Shift</button></div>`;
+      $('arrived').onclick=arriveFromDriving;$('fuelStop').onclick=startFuelStop;$('endShift').onclick=openEnd;
+    }else if(c.type==='Fueling'){
+      $('timer').textContent=clock(secs(c));$('startedLine').textContent=`Started ${t12(c.start)}${c.location?' • '+c.location:''}`;
+      $('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="finish">Done Fueling</button><button class="btn danger" id="endShift">End Shift</button></div>`;
+      $('finish').onclick=finishFueling;$('endShift').onclick=openEnd;
+    }else{
+      $('timer').textContent=clock(secs(c));$('startedLine').textContent=`Started ${t12(c.start)}${c.location?' • '+c.location:''}`;
+      $('mainControls').innerHTML=`<div class="actions"><button class="btn dark" id="finish">Done ${esc(c.type)}</button><button class="btn danger" id="endShift">End Shift</button></div>`;
+      $('finish').onclick=()=>finishGuided(c);$('endShift').onclick=openEnd;
+    }
+  }else{
+    $('currentIcon').textContent='＋';$('currentName').textContent='No Activity';$('timer').textContent='00:00';
+    $('startedLine').textContent=day.currentLocation?`Current location: ${day.currentLocation}`:'Select an activity when work begins.';
+    $('mainControls').innerHTML=`<div class="actions"><button class="btn primary" id="startAct">${day.currentLocation?'Choose Next Step':'Start Activity'}</button><button class="btn danger" id="endShift">End Shift</button></div>`;
+    $('startAct').onclick=()=>day.currentLocation?showNextActions(day.currentLocation):openActivities();$('endShift').onclick=openEnd;
+  }
+}
+function openActivities(){
+  const card=$('activityCard');card.querySelector('.eyebrow').textContent='NEW ENTRY';card.querySelector('h2').textContent='Start Activity';
+  card.classList.remove('hidden');$('detailsCard').classList.add('hidden');
+  $('activityGrid').innerHTML=defs.filter(d=>d[0]!=='Drop & Hook'||day.vehicle==='Semi-Truck').map(d=>activityButton(d[0])).join('');
+  document.querySelectorAll('#activityGrid .activity').forEach(b=>b.onclick=()=>openDetails(b.dataset.type,day.currentLocation||''));
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
 function opts(selected=''){return`<option value="">Select location</option>${places.map(p=>`<option ${p[0]===selected?'selected':''}>${esc(p[0])}</option>`).join('')}<option>Other</option>`}
 function pdata(n){return places.find(p=>p[0]===n)||[n,'']}
 function addr(id,n){const e=$(id);if(!e)return;const a=pdata(n)[1];e.innerHTML=a?`<strong>Address</strong><br>${esc(a)}`:'';e.classList.toggle('hidden',!a)}
-function openDetails(type){pending=type;$('activityCard').classList.add('hidden');$('detailsCard').classList.remove('hidden');$('detailsTitle').textContent=type;let h='',needs=!['Lunch','Other'].includes(type);if(type==='Driving'){h=`<div class="stack"><div class="field"><label>Origin</label><select class="control" id="origin">${opts()}</select><div class="address hidden" id="originAddr"></div></div><div class="field"><label>Destination</label><select class="control" id="destination">${opts()}</select><div class="address hidden" id="destAddr"></div></div></div>`}else if(needs){h=`<div class="field"><label>Location</label><select class="control" id="location">${opts()}</select><div class="address hidden" id="locAddr"></div></div>`}if(type==='Waiting')h+=`<div class="field"><label>Reason</label><select class="control" id="reason"><option>Dock busy</option><option>Waiting on paperwork</option><option>Waiting on trailer</option><option>Waiting on customer</option><option>Other</option></select></div>`;if(type==='Drop & Hook')h+=`<div class="grid2"><div class="field"><label>Action</label><select class="control" id="trailerAction"><option>Hook Trailer</option><option>Drop Trailer</option><option>Swap Trailers</option></select></div><div class="field"><label>Trailer</label><select class="control" id="trailerChoice"><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div></div>`;h+=`<div class="field"><label>Notes (optional)</label><textarea class="control" id="notes" placeholder="Add a short note only if needed"></textarea></div><div class="actions"><button class="btn primary" id="confirmAct">Start ${esc(type)}</button><button class="btn soft" id="backAct">Back</button></div>`;$('detailsContent').innerHTML=h;$('confirmAct').onclick=confirmActivity;$('backAct').onclick=openActivities;if(type==='Driving'){const u=()=>{addr('originAddr',$('origin').value);addr('destAddr',$('destination').value)};$('origin').onchange=u;$('destination').onchange=u}else if(needs){$('location').onchange=()=>addr('locAddr',$('location').value)}}
-function confirmActivity(){const type=pending,notes=$('notes')?.value.trim()||'';let location='',address='',meta={};if(type==='Driving'){const o=$('origin').value,d=$('destination').value;if(!o||!d)return toast('Select origin and destination');location=`${o} → ${d}`;address=[pdata(o)[1],pdata(d)[1]].filter(Boolean).join(' → ');meta={origin:o,destination:d};remember(d)}else if(!['Lunch','Other'].includes(type)){const l=$('location').value;if(!l)return toast('Select a location');location=l;address=pdata(l)[1];remember(l)}if(type==='Waiting')meta.reason=$('reason').value;if(type==='Drop & Hook'){meta.trailerAction=$('trailerAction').value;meta.trailer=$('trailerChoice').value}startActivity(type,location,address,notes,meta);$('detailsCard').classList.add('hidden');toast(`${type} started`)}function remember(n){if(!n||n==='Other')return;let r=read(K.recent,[]).filter(x=>x!==n);r.unshift(n);write(K.recent,r.slice(0,5))}
-function startActivity(type,location='',address='',notes='',meta={}){if(cur())endCurrent(false);day.activities.push({id:crypto.randomUUID?.()||Date.now()+'',type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta});save();renderCurrent();renderTimeline()}function endCurrent(r=true){const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();save();if(r){renderCurrent();renderTimeline();renderSummary()}}}
+function openDetails(type,presetLocation=''){
+  pending=type;$('activityCard').classList.add('hidden');$('detailsCard').classList.remove('hidden');$('detailsTitle').textContent=type;
+  let h='',needs=!['Lunch','Other'].includes(type);
+  if(type==='Driving'){
+    const origin=presetLocation||day.currentLocation||'';
+    h=`<div class="stack">${origin?`<div class="context-card"><strong>Starting from ${esc(origin)}</strong><small>${esc(pdata(origin)[1])}</small><input type="hidden" id="origin" value="${esc(origin)}"></div>`:`<div class="field"><label>Origin</label><select class="control" id="origin">${opts()}</select><div class="address hidden" id="originAddr"></div></div>`}<div class="field"><label>Destination</label><select class="control" id="destination">${opts()}</select><div class="address hidden" id="destAddr"></div></div></div>`;
+  }else if(needs){
+    if(presetLocation){
+      h=`<div class="context-card"><strong>${esc(presetLocation)}</strong><small>${esc(pdata(presetLocation)[1])}</small><input type="hidden" id="location" value="${esc(presetLocation)}"></div>`;
+    }else{
+      h=`<div class="field"><label>Location</label><select class="control" id="location">${opts()}</select><div class="address hidden" id="locAddr"></div></div>`;
+    }
+  }
+  if(type==='Waiting')h+=`<div class="field"><label>Reason</label><select class="control" id="reason"><option>Dock busy</option><option>Waiting on paperwork</option><option>Waiting on trailer</option><option>Waiting on customer</option><option>Other</option></select></div>`;
+  if(type==='Drop & Hook')h+=`<div class="grid2"><div class="field"><label>Action</label><select class="control" id="trailerAction"><option>Hook Trailer</option><option>Drop Trailer</option><option>Swap Trailers</option></select></div><div class="field"><label>Trailer</label><select class="control" id="trailerChoice"><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div></div>`;
+  const ph=type==='Pickup'?'What are you picking up?':type==='Delivery'?'What are you delivering?':'Add a short note only if needed';
+  h+=`<div class="field"><label>Notes (optional)</label><textarea class="control" id="notes" placeholder="${ph}"></textarea></div><div class="actions"><button class="btn primary" id="confirmAct">Start ${esc(type)}</button><button class="btn soft" id="backAct">Back</button></div>`;
+  $('detailsContent').innerHTML=h;$('confirmAct').onclick=confirmActivity;$('backAct').onclick=()=>presetLocation?showNextActions(presetLocation):openActivities();
+  if(type==='Driving'){
+    const u=()=>{if($('originAddr'))addr('originAddr',$('origin').value);addr('destAddr',$('destination').value)};
+    if($('origin')?.tagName==='SELECT')$('origin').onchange=u;$('destination').onchange=u;u();
+  }else if(needs&&!presetLocation){$('location').onchange=()=>addr('locAddr',$('location').value)}
+}
+function confirmActivity(){
+  const type=pending,notes=$('notes')?.value.trim()||'';let location='',address='',meta={};
+  if(type==='Driving'){
+    const o=$('origin').value,d=$('destination').value;if(!o||!d)return toast('Select origin and destination');
+    location=`${o} → ${d}`;address=[pdata(o)[1],pdata(d)[1]].filter(Boolean).join(' → ');meta={origin:o,destination:d};day.currentLocation=o;
+  }else if(!['Lunch','Other'].includes(type)){
+    const l=$('location').value;if(!l)return toast('Select a location');location=l;address=pdata(l)[1];day.currentLocation=l;
+  }
+  if(type==='Waiting')meta.reason=$('reason').value;
+  if(type==='Drop & Hook'){meta.trailerAction=$('trailerAction').value;meta.trailer=$('trailerChoice').value}
+  startActivity(type,location,address,notes,meta);hideActivityPanels();toast(`${type} started`);
+}
+function startActivity(type,location='',address='',notes='',meta={}){
+  if(cur())endCurrent(false);
+  day.activities.push({id:crypto.randomUUID?.()||Date.now()+'',type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta});
+  save();renderCurrent();renderTimeline();
+}
+function endCurrent(r=true){
+  const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();save();if(r){renderCurrent();renderTimeline();renderSummary()}}
+}
+function arriveFromDriving(){
+  const c=cur();if(!c||c.type!=='Driving')return;
+  const dest=c.destination||String(c.location||'').split(' → ').pop().trim();
+  endCurrent(false);day.currentLocation=dest||'';day.resumeRoute=null;save();renderCurrent();renderTimeline();renderSummary();
+  toast(dest?`Arrived at ${dest}`:'Arrived');showNextActions(dest,'Driving');
+}
+function startFuelStop(){
+  const c=cur();if(!c||c.type!=='Driving')return;
+  day.resumeRoute={origin:c.origin||'',destination:c.destination||'',location:c.location||'',address:c.address||''};
+  endCurrent(false);
+  startActivity('Fueling','En route', '', '', {resumeRoute:true});
+  hideActivityPanels();toast('Fueling started');
+}
+function finishFueling(){
+  const c=cur();if(!c||c.type!=='Fueling')return;
+  endCurrent(false);
+  const r=day.resumeRoute;
+  if(r&&r.destination){
+    day.resumeRoute=null;
+    startActivity('Driving',r.location||`${r.origin} → ${r.destination}`,r.address||'','',{origin:r.origin,destination:r.destination,resumedAfterFuel:true});
+    toast(`Continuing to ${r.destination}`);
+  }else{
+    save();renderCurrent();renderTimeline();renderSummary();
+    if(day.currentLocation)showNextActions(day.currentLocation,'Fueling');else openActivities();
+  }
+}
+function finishGuided(activity){
+  const snapshot={...activity};
+  endCurrent(false);save();renderCurrent();renderTimeline();renderSummary();
+  const loc=snapshot.contextLocation||snapshot.location||day.currentLocation||'';
+  if(loc&&loc!=='En route')day.currentLocation=loc;
+  toast(`${snapshot.type} finished`);
+  showNextActions(day.currentLocation||'',snapshot.type);
+}
 function renderTimeline(){if(!day)return;const l=[...day.activities].reverse();$('timeline').innerHTML=l.length?l.map(a=>`<div class="event"><div class="event-time">${t12(a.start)}</div><div class="event-body ${!a.end?'active':''}"><div class="event-title"><span>${icon(a.type)} ${esc(a.type)}</span><span class="badge">${a.end?fmt(dur(a.start,a.end)):fmt(Math.floor(secs(a)/60))}</span></div>${a.location?`<div class="event-meta">${esc(a.location)}</div>`:''}${a.address?`<div class="event-meta">${esc(a.address)}</div>`:''}${a.reason?`<div class="event-meta">Reason: ${esc(a.reason)}</div>`:''}${a.notes?`<div class="event-meta">${esc(a.notes)}</div>`:''}</div></div>`).join(''):'<p>No activities recorded yet.</p>'}
 function renderSummary(){if(!day)return;const t=totals(day);$('productivityBar').style.width=Math.min(100,t.pct)+'%';$('summaryText').textContent=`${t.pct.toFixed(0)}% productive so far`;$('liveSummary').innerHTML=`<div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>NONPRODUCTIVE</span><b>${fmt(t.np)}</b></div>`}
-function startDay(){const driver=$('driver').value.trim(),vehicle=$('vehicle').value,date=$('date').value,start=$('startTime').value,startingTrailer=vehicle==='Semi-Truck'?$('startingTrailer').value:'';if(!driver||!vehicle||!date||!start)return toast('Complete all shift fields');if(!pretripValid()){openPretrip(false);return}const pretrip=currentPretrip();day={id:crypto.randomUUID?.()||Date.now()+'',driver,vehicle,startingTrailer,date,start,startedAt:new Date().toISOString(),end:'',endAt:'',pretrip,activities:[]};localStorage.removeItem(K.pretrip);write(K.profile,{driver,vehicle,startingTrailer});save();render();toast('Shift started')}
+function startDay(){const driver=$('driver').value.trim(),vehicle=$('vehicle').value,date=$('date').value,start=$('startTime').value,startingTrailer=vehicle==='Semi-Truck'?$('startingTrailer').value:'';if(!driver||!vehicle||!date||!start)return toast('Complete all shift fields');if(!pretripValid()){openPretrip(false);return}const pretrip=currentPretrip();day={id:crypto.randomUUID?.()||Date.now()+'',driver,vehicle,startingTrailer,date,start,startedAt:new Date().toISOString(),end:'',endAt:'',pretrip,currentLocation:'',resumeRoute:null,activities:[]};localStorage.removeItem(K.pretrip);write(K.profile,{driver,vehicle,startingTrailer});save();render();toast('Shift started')}
 function openEnd(){$('endTime').value=now();$('endError').classList.add('hidden');$('endDialog').showModal()}function finishDay(){if(cur())endCurrent(false);const end=$('endTime').value;if(!end||dur(day.start,end)<=0){$('endError').textContent='End time must be after start time.';$('endError').classList.remove('hidden');return}day.end=end;day.endAt=new Date().toISOString();day.completedAt=new Date().toISOString();day.totals=totals(day,false);const h=read(K.history,[]);h.unshift(day);write(K.history,h);selected=day;localStorage.removeItem(K.active);day=null;$('endDialog').close();render();showReport(selected,true)}
 function showReport(d,celebrate=false){selected=d;const t=d.totals||totals(d,false),rows=d.activities.map((a,i)=>`<tr><td>${i+1}</td><td>${t12(a.start)}</td><td>${t12(a.end)}</td><td>${fmt(dur(a.start,a.end))}</td><td>${esc(a.type)}</td><td>${esc(a.location)}</td><td>${esc(a.address)}</td><td>${esc(a.reason||a.trailerAction||'')}</td><td>${esc(a.notes)}</td></tr>`).join('');$('report').innerHTML=`${celebrate?`<div class="celebrate"><div class="check">✓</div><h1 style="margin-top:14px">Shift Complete</h1><p>Everything has been saved.</p></div>`:''}<div style="text-align:center"><h1>Daily Driver Time Sheet</h1><p>${esc(d.driver)} • ${esc(d.date)} • ${esc(d.vehicle)}<br>${t12(d.start)}–${t12(d.end)}</p></div>${pretripReport(d.pretrip)}<div style="overflow:auto"><table><thead><tr><th>#</th><th>Start</th><th>End</th><th>Time</th><th>Activity</th><th>Location</th><th>Address</th><th>Detail</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div><div class="barprog" style="margin-top:16px"><i style="width:${Math.min(100,t.pct)}%"></i></div><div class="summary-grid" style="margin-top:14px"><div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>PRODUCTIVITY</span><b>${t.pct.toFixed(1)}%</b></div></div>`;$('reportCard').classList.remove('hidden');if(celebrate){['resumeCard','startScreen','activeScreen','timelineView','summaryView','settingsView','historyView'].forEach(id=>$(id)?.classList.add('hidden'));$('bottomBar').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'})}else{$('reportCard').scrollIntoView({behavior:'smooth'})}}
 function rowsFor(d){const t=d.totals||totals(d,false);return d.activities.map((a,i)=>({Driver:d.driver,Date:d.date,Vehicle:d.vehicle,ShiftStart:d.start,ShiftEnd:d.end,Activity:i+1,Start:a.start,End:a.end,Minutes:dur(a.start,a.end),Type:a.type,Location:a.location,Address:a.address,Reason:a.reason||'',Notes:a.notes,PreTripCompleted:d.pretrip?.completedAt||'',Odometer:d.pretrip?.odometer||'',PreTripCondition:d.pretrip?.condition||'',PreTripComments:d.pretrip?.comments||'',ProductivityPercent:t.pct.toFixed(1)}))}function dl(n,x,t){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([x],{type:t}));a.href=u;a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(u),800)}function csv(ds,n){const r=ds.flatMap(rowsFor);if(!r.length)return toast('No records');const h=Object.keys(r[0]),q=v=>`"${String(v??'').replaceAll('"','""')}"`;dl(n,[h.map(q).join(','),...r.map(x=>h.map(k=>q(x[k])).join(','))].join('\n'),'text/csv')}function json(ds,n){dl(n,JSON.stringify(ds,null,2),'application/json')}
@@ -269,6 +431,6 @@ function pretripReport(p){
 
 function renderHistory(){const h=read(K.history,[]);$('history').innerHTML=h.length?h.map(d=>`<div class="event-body" style="margin-bottom:9px"><div class="event-title"><span>${esc(d.driver)}</span><span class="badge">${esc(d.date)}</span></div><div class="event-meta">${esc(d.vehicle)} • ${fmt((d.totals||totals(d,false)).shift)}</div><div class="actions"><button class="btn soft" data-view-report="${d.id}">View Report</button></div></div>`).join(''):'<p>No completed shifts yet.</p>';document.querySelectorAll('[data-view-report]').forEach(b=>b.onclick=()=>showReport(h.find(x=>x.id===b.dataset.viewReport)))}
 async function weather(){if(!navigator.geolocation)return toast('Location not supported');navigator.geolocation.getCurrentPosition(async p=>{try{const u=`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit`;const j=await fetch(u).then(r=>r.json()),temp=Math.round(j.current.temperature_2m);write(K.weather,{temp,at:Date.now()});showWeather();toast('Weather enabled')}catch{toast('Weather unavailable')}},()=>toast('Location permission was not granted'),{enableHighAccuracy:false,timeout:8000})}function showWeather(){const w=read(K.weather,null);if(w&&Date.now()-w.at<6*3600000){$('weatherChip').textContent=`☀️ ${w.temp}°F`;$('weatherChip').classList.remove('hidden')}}
-function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('pretripBtn').onclick=()=>openPretrip(false);$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('cancelPretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>{$('activityCard').classList.add('hidden')};document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();show('home');window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){localStorage.removeItem(K.active);location.reload()}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c)$('timer').textContent=clock(secs(c));if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('pretripBtn').onclick=()=>openPretrip(false);$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('cancelPretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>hideActivityPanels();document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();show('home');window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){localStorage.removeItem(K.active);location.reload()}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c){if(c.type==='Lunch'){const r=Math.max(0,1800-secs(c));$('timer').textContent=r?clock(r):'30:00+';$('startedLine').textContent=r?`Lunch ends in ${clock(r)} • Started ${t12(c.start)}`:`30 minutes reached • Started ${t12(c.start)}`}else $('timer').textContent=clock(secs(c))}if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 init();})();
 </script></body></html>
