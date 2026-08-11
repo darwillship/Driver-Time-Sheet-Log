@@ -56,3 +56,12 @@ Changes:
 - Fuel Stop is available while driving. Done Fueling automatically resumes the same route.
 - Lunch uses a 30-minute countdown. It does not falsify the record by auto-ending; the driver taps End Lunch when actually finished.
 - Location and route context carry forward so drivers do not repeatedly select the same information.
+
+
+## Version 1.2.2 — Screen Transition Fix
+
+- Fixes Start Shift setup and Active Shift dashboard appearing together.
+- Once Start Shift is pressed, the setup screen disappears completely.
+- The Active Shift / next-step dashboard immediately moves to the top of the screen.
+- When a shift is not active, all active-shift panels, timeline, activity chooser, summary, and bottom navigation are hidden.
+- Closing the completed shift report returns to a clean new-shift setup only.
