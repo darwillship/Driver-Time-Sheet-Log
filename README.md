@@ -1,31 +1,25 @@
-# Driver Time Sheet Log — Version 1.1.2
+# Driver Time Sheet Log — Version 1.2
 
-GitHub Pages-compatible mobile PWA.
+GitHub Pages-compatible mobile Progressive Web App.
 
-## Highlights
-- Dynamic greeting
-- Live shift progress ring
-- Optional local weather
-- Driver photo stored on device
-- Automatic light/dark mode
-- Recent-location shortcuts and destination suggestion
-- Bottom navigation: Home, Timeline, Summary, Settings
-- Animated activity feedback and haptics
-- End-of-shift completion screen
-- Local device history, CSV/JSON export, print/PDF, offline support
+## Version 1.2 workflow
+- Start Shift starts only the shift clock.
+- Start a location visit by selecting the location and the work being done there.
+- Finish Visit stamps departure time.
+- Start Travel records driving between locations.
+- Arrive ends the travel block and immediately opens the next-location visit form.
+- Timeline entries can be edited before or after shift completion.
+- Add Missed Entry can insert forgotten visits or travel blocks.
+- Validation blocks overlapping times and invalid time ranges.
 
-## Install
-Upload all five files to the root of the existing GitHub repository and allow GitHub Pages to redeploy.
+All records remain on the device in localStorage. CSV/JSON exports and printable daily reports remain available.
 
+## Deploy
+Upload these files to the root of the GitHub Pages repository:
+- index.html
+- manifest.webmanifest
+- sw.js
+- icon.svg
+- README.md
 
-## Version 1.1.2 fix
-After End Shift, the active shift dashboard and bottom navigation are hidden. The completed-shift report becomes the only primary screen until the driver closes it and returns home.
-
-
-## Version 1.1.2 changes
-
-- Removed all quick/recent location suggestion chips from activity screens.
-- Removed the suggested destination prompt from Driving.
-- Location dropdowns now show the full saved location list in a consistent order.
-- Saved addresses still appear immediately after a location is selected.
-- All Version 1.1.1 completed-shift fixes remain in place.
+After deployment, fully close and reopen the installed web app so the v1.2 service worker replaces the older cache.
