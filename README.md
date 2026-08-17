@@ -77,3 +77,15 @@ Changes:
 - Page 2 contains the full pre-trip inspection.
 - Every pre-trip checklist item prints with its OK or Needs Attention result.
 - Pre-trip page includes driver, vehicle, inspection date/time, odometer, vehicle condition, comments, and driver acknowledgment.
+
+
+## Version 1.3.0 — Vehicle Documents
+
+- Adds a fifth bottom tab: **Vehicle**.
+- The Vehicle tab automatically follows the vehicle selected at the start of the active shift.
+- Adds Insurance Card, Registration, and Safety Inspection document cards.
+- Reads the selected vehicle's `storage_folder` from the Supabase `vehicles` table.
+- Creates private, temporary signed links to files in the `vehicle-documents` bucket.
+- Drivers receive read-only access; the app does not upload, replace, edit, or delete fleet documents.
+- The current build contains the Supabase Project URL but intentionally leaves the **Publishable key** as a placeholder until the owner supplies it.
+- The app is prepared to use Supabase Anonymous Sign-Ins so drivers do not need to type a cloud username or password once Anonymous Sign-Ins are enabled.

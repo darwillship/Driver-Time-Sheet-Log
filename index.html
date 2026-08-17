@@ -2,6 +2,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f6f8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>Driver Time Sheet Log</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--ink:#151922;--muted:#717784;--line:#e3e7ed;--green:#15865b;--green2:#0f6d49;--red:#ca4037;--blue:#2869df;--yellow:#d99a00;--orange:#dd7900;--shadow:0 16px 46px rgba(20,26,36,.08);--r:24px}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1217;--card:#191e26;--ink:#f5f7fb;--muted:#9aa2af;--line:#2a313c;--shadow:0 16px 46px rgba(0,0,0,.32)}}
@@ -16,14 +17,32 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 
 .event{display:grid;grid-template-columns:54px 1fr;gap:10px;margin-bottom:10px}.event-time{font-size:.76rem;color:var(--muted);font-weight:800;padding-top:13px}.event-body{border:1px solid var(--line);border-radius:18px;padding:13px 14px;background:var(--card)}.event-body.active{border-color:#9fd0ba;background:color-mix(in srgb,#eaf8f1 45%,var(--card))}.event-title{display:flex;justify-content:space-between;gap:8px;font-weight:900}.badge{font-size:.7rem;padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--bg) 75%,var(--card));white-space:nowrap}.event-meta{font-size:.79rem;color:var(--muted);margin-top:5px;line-height:1.4}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.sum{border:1px solid var(--line);border-radius:16px;padding:13px;background:color-mix(in srgb,var(--bg) 75%,var(--card))}.sum span{font-size:.72rem;color:var(--muted);font-weight:850}.sum b{display:block;font-size:1.15rem;margin-top:3px}.barprog{height:10px;background:var(--line);border-radius:99px;overflow:hidden}.barprog i{display:block;height:100%;background:var(--green);transition:width .5s}.celebrate{text-align:center;padding:20px}.check{width:76px;height:76px;margin:auto;border-radius:50%;background:#e7f6ef;color:var(--green);display:grid;place-items:center;font-size:2.3rem;animation:pop .45s ease}@keyframes pop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1)}}
-.bottom{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom))}.nav{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:7px 4px;border-radius:13px;font-size:.67rem;font-weight:800}.nav button span{display:block;font-size:1.25rem;margin-bottom:2px}.nav button.active{color:var(--green);background:color-mix(in srgb,#eaf6f0 55%,transparent)}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom))}.nav{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:7px 4px;border-radius:13px;font-size:.67rem;font-weight:800}.nav button span{display:block;font-size:1.25rem;margin-bottom:2px}.nav button.active{color:var(--green);background:color-mix(in srgb,#eaf6f0 55%,transparent)}
+
+.vehicle-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.vehicle-icon{width:58px;height:58px;border-radius:18px;background:color-mix(in srgb,#e9f6f0 65%,var(--card));display:grid;place-items:center;font-size:1.75rem;flex:0 0 auto}
+.vehicle-head h2{margin:0 0 3px;font-size:1.35rem}
+.vehicle-head p{margin:0;font-size:.82rem}
+.doc-list{display:grid;gap:10px}
+.doc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:18px;padding:14px;background:color-mix(in srgb,var(--bg) 70%,var(--card))}
+.doc-left{display:flex;align-items:center;gap:11px;min-width:0}
+.doc-ico{width:42px;height:42px;border-radius:13px;background:color-mix(in srgb,var(--bg) 72%,var(--card));display:grid;place-items:center;font-size:1.2rem;flex:0 0 auto}
+.doc-copy b{display:block}
+.doc-copy small{display:block;color:var(--muted);margin-top:2px;font-size:.73rem}
+.doc-action{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;font-weight:850;white-space:nowrap}
+.doc-action:disabled{opacity:.45}
+.cloud-state{border:1px dashed var(--line);border-radius:17px;padding:14px;color:var(--muted);font-size:.82rem;line-height:1.45;margin-top:12px}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--yellow)}
+.status-dot.ok{background:var(--green)}
+.status-dot.bad{background:var(--red)}
+
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));z-index:80;transform:translateX(-50%) translateY(18px);opacity:0;background:#1c222a;color:white;padding:12px 16px;border-radius:14px;font-weight:800;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}dialog{border:0;border-radius:24px;padding:0;width:min(94vw,680px);background:var(--card);color:var(--ink);box-shadow:0 30px 90px rgba(0,0,0,.35)}dialog::backdrop{background:rgba(8,12,18,.58)}.dialog-body{padding:20px;max-height:90vh;overflow:auto}table{width:100%;border-collapse:collapse;font-size:.73rem}th,td{border:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}th{background:var(--bg)}
 @media(min-width:620px){.grid2{grid-template-columns:1fr 1fr}.activity-grid{grid-template-columns:repeat(4,1fr)}.summary-grid{grid-template-columns:repeat(4,1fr)}}
 @media print{
   @page{size:Letter portrait;margin:.42in}
   :root{--bg:#fff;--card:#fff;--ink:#111;--muted:#444;--line:#cfd4da}
   html,body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#settingsView,#historyView,#pretripScreen{display:none!important}
+  .appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#vehicleView,#settingsView,#historyView,#pretripScreen{display:none!important}
   main{max-width:none!important;padding:0!important;margin:0!important}
   #reportCard{display:block!important;background:#fff!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
   #report{color:#111!important}
@@ -125,6 +144,36 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 <section id="timelineView" class="hidden"><section class="card"><div class="eyebrow">Today</div><h2>Activity Timeline</h2><div id="timeline"></div></section></section>
 <section id="summaryView" class="hidden"><section class="card"><div class="eyebrow">Live summary</div><h2>Today at a glance</h2><div class="barprog"><i id="productivityBar" style="width:0%"></i></div><p id="summaryText" style="margin-top:8px"></p><div class="summary-grid" id="liveSummary"></div></section></section>
 <section id="historyView" class="hidden"><section class="card"><div class="eyebrow">Saved on this device</div><h2>Shift History</h2><div id="history"></div><div class="actions grid2"><button class="btn soft" id="csvAll">Export All CSV</button><button class="btn soft" id="jsonAll">Export All JSON</button></div></section></section>
+
+<section id="vehicleView" class="hidden">
+  <section class="card">
+    <div class="eyebrow">Assigned Vehicle</div>
+    <div class="vehicle-head">
+      <div class="vehicle-icon">🚚</div>
+      <div>
+        <h2 id="vehicleViewName">Vehicle</h2>
+        <p id="vehicleViewSub">Documents for the vehicle selected at Start Shift.</p>
+      </div>
+    </div>
+    <div class="eyebrow" style="margin-bottom:9px">Vehicle Documents</div>
+    <div class="doc-list">
+      <div class="doc-row">
+        <div class="doc-left"><div class="doc-ico">🛡️</div><div class="doc-copy"><b>Insurance Card</b><small id="insuranceStatus">Checking availability…</small></div></div>
+        <button class="doc-action" id="viewInsurance" disabled>View</button>
+      </div>
+      <div class="doc-row">
+        <div class="doc-left"><div class="doc-ico">📄</div><div class="doc-copy"><b>Registration</b><small id="registrationStatus">Checking availability…</small></div></div>
+        <button class="doc-action" id="viewRegistration" disabled>View</button>
+      </div>
+      <div class="doc-row">
+        <div class="doc-left"><div class="doc-ico">✓</div><div class="doc-copy"><b>Safety Inspection</b><small id="inspectionStatus">Not uploaded yet</small></div></div>
+        <button class="doc-action" id="viewInspection" disabled>View</button>
+      </div>
+    </div>
+    <div class="cloud-state" id="vehicleCloudState"><span class="status-dot"></span><span id="vehicleCloudText">Connecting to vehicle documents…</span></div>
+  </section>
+</section>
+
 <section id="settingsView" class="hidden"><section class="card"><div class="eyebrow">Personalize</div><h2>Settings</h2><div class="stack"><div class="field"><label>Driver photo</label><input class="control" id="avatarInput" type="file" accept="image/*"></div><div class="field"><label>Appearance</label><select class="control" id="themeSelect"><option value="system">Use phone setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div><button class="btn soft" id="weatherBtn">Enable Local Weather</button><p style="font-size:.8rem">Weather is optional and only requests location when you enable it.</p></div></section></section>
 <section class="card hidden" id="reportCard"><div id="report"></div><div class="actions no-print"><button class="btn dark" onclick="print()">Print / Save PDF</button><button class="btn soft" id="csvDay">Export CSV</button><button class="btn soft" id="jsonDay">Export JSON</button><button class="btn soft" id="closeReport">Close</button></div></section>
 
@@ -188,11 +237,14 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 
 
 </main>
-<div class="bottom hidden" id="bottomBar"><div class="nav"><button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="timeline"><span>≡</span>Timeline</button><button data-view="summary"><span>◔</span>Summary</button><button data-view="settings"><span>⚙</span>Settings</button></div></div>
+<div class="bottom hidden" id="bottomBar"><div class="nav"><button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="timeline"><span>≡</span>Timeline</button><button data-view="summary"><span>◔</span>Summary</button><button data-view="vehicle"><span>🚚</span>Vehicle</button><button data-view="settings"><span>⚙</span>Settings</button></div></div>
 <dialog id="endDialog"><div class="dialog-body"><div class="eyebrow">Finish the day</div><h2>End Shift</h2><div class="field"><label>End time</label><input class="control" id="endTime" type="time"></div><p id="endError" class="hidden" style="color:var(--red);font-weight:800"></p><div class="actions"><button class="btn primary" id="confirmEnd">Save Completed Shift</button><button class="btn soft" id="cancelEnd">Cancel</button></div></div></dialog>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),K={active:'dt-v11-active',history:'dt-v11-history',profile:'dt-v11-profile',recent:'dt-v11-recent',theme:'dt-v11-theme',avatar:'dt-v11-avatar',weather:'dt-v11-weather',pretrip:'dt-v11-pretrip-pending'};
+const SUPABASE_URL='https://hqhfstosclasgwgxubip.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='__SUPABASE_PUBLISHABLE_KEY__';
+let cloud=null,vehicleLoadToken=0;
 const places=[['ALG','1053 N Schmidt Rd, Romeoville, IL 60446'],['ENRU','1000 Windham Pkwy, Bolingbrook, IL 60490'],['Darwill Hillside','11900 Roosevelt Rd, Hillside, IL 60162'],['Darwill McCook','8701 47th St Ste C, McCook, IL 60525'],['South Suburban Post Office','6801 W 73rd St, Bedford Park, IL 60499'],['Fox Valley Post Office','3900 Gabrielle Ln, Aurora, IL 60598'],['Carol Stream Post Office','550 E Fullerton Ave, Carol Stream, IL 60188'],['Worth Post Office','11114 S Harlem Ave, Worth, IL 60482'],['Bolingbrook Post Office','105 Canterbury Ln, Bolingbrook, IL 60440'],['Darwill Oakbrook Tower Terrace','1 Tower Ln, Oakbrook Terrace, IL 60181'],['Envelopes Only','2000 S Park Ave, Streamwood, IL 60107'],['Federal Envelope','608 Country Club Dr, Bensenville, IL 60106'],['Universal Laminating','910 Carlow Dr Ste A, Bolingbrook, IL 60490'],['Platinum Converting','1560 W Stearns Rd, Bartlett, IL 60103'],['Victor Envelope','301 Arthur Ct, Bensenville, IL 60106'],['Supremex Naperville','1500 Shore Rd, Naperville, IL 60563'],['Supremex Chicago','4114 S Peoria St, Chicago, IL 60609']];
 const defs=[['Driving','🚚','Travel between locations'],['Loading','📦','Loading vehicle or trailer'],['Unloading','📥','Unloading at a stop'],['Pickup','⬆️','Picking up material'],['Delivery','⬇️','Delivering material'],['Waiting','⏳','Waiting for access or service'],['Fueling','⛽','Fuel stop'],['Lunch','🍽️','30-minute lunch'],['Drop & Hook','🔁','Hook, drop, or swap trailer'],['Vehicle issue','🔧','Mechanical or vehicle problem'],['Other','•••','Another work activity']],productive=new Set(['Driving','Loading','Unloading','Pickup','Delivery','Fueling','Drop & Hook']);let day=null,selected=null,pending='';
 const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),now=()=>new Date().toTimeString().slice(0,5),today=()=>new Date().toISOString().slice(0,10),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -200,9 +252,99 @@ const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b},dur=(a,b)=>{le
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1700);navigator.vibrate?.(18)}function save(){if(day)write(K.active,day)}function cur(){return day?.activities.find(a=>!a.end)||null}function secs(a){return Math.max(0,Math.floor((Date.now()-new Date(a.startedAt).getTime())/1000))}function clock(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`}
 function totals(d,live=true){const shift=dur(d.start,d.end||(live?now():d.start));let p=0,w=0,l=0,drive=0;for(const a of d.activities){const n=a.end?dur(a.start,a.end):(live?Math.floor(secs(a)/60):0);if(productive.has(a.type))p+=n;if(a.type==='Waiting')w+=n;if(a.type==='Lunch')l+=n;if(a.type==='Driving')drive+=n}return{shift,p,w,l,drive,np:Math.max(0,shift-p),pct:shift?p/shift*100:0}}
 function greeting(){const h=new Date().getHours(),name=(day?.driver||$('driver').value||read(K.profile,{}).driver||'').split(' ')[0];$('greeting').textContent=`Good ${h<12?'Morning':h<17?'Afternoon':'Evening'}${name?', '+name:''}`}
-function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));if(!day)return;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='settings')$('settingsView').classList.remove('hidden')}
-function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');if(active){$('startScreen').classList.add('hidden');$('activeScreen').classList.remove('hidden');$('bottomBar').classList.remove('hidden');show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}else{$('startScreen').classList.remove('hidden');$('activeScreen').classList.add('hidden');$('timelineView').classList.add('hidden');$('summaryView').classList.add('hidden');$('settingsView').classList.add('hidden');$('activityCard').classList.add('hidden');$('detailsCard').classList.add('hidden');$('bottomBar').classList.add('hidden');renderPretripStatus()}greeting();renderHistory()}
+function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','vehicleView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));if(!day)return;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='vehicle'){$('vehicleView').classList.remove('hidden');renderVehicle()}if(view==='settings')$('settingsView').classList.remove('hidden')}
+function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');if(active){$('startScreen').classList.add('hidden');$('activeScreen').classList.remove('hidden');$('bottomBar').classList.remove('hidden');show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}else{$('startScreen').classList.remove('hidden');$('activeScreen').classList.add('hidden');$('timelineView').classList.add('hidden');$('summaryView').classList.add('hidden');$('vehicleView').classList.add('hidden');$('settingsView').classList.add('hidden');$('activityCard').classList.add('hidden');$('detailsCard').classList.add('hidden');$('bottomBar').classList.add('hidden');renderPretripStatus()}greeting();renderHistory()}
 function updateRing(){if(!day)return;const t=totals(day),target=480,circ=2*Math.PI*82,p=Math.min(1,t.shift/target);$('ringFill').style.strokeDasharray=circ;$('ringFill').style.strokeDashoffset=circ*(1-p)}
+
+
+function cloudConfigured(){
+  return SUPABASE_URL.startsWith('https://') &&
+    SUPABASE_PUBLISHABLE_KEY &&
+    !SUPABASE_PUBLISHABLE_KEY.includes('__SUPABASE_');
+}
+async function getCloud(){
+  if(cloud)return cloud;
+  if(!cloudConfigured())throw new Error('Supabase Publishable key has not been added yet.');
+  if(!window.supabase?.createClient)throw new Error('Cloud library did not load. Check internet access.');
+  cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+  });
+  let {data:{session}}=await cloud.auth.getSession();
+  if(!session){
+    const {error}=await cloud.auth.signInAnonymously();
+    if(error)throw error;
+  }
+  return cloud;
+}
+function setDocState(kind,text,url=''){
+  const map={insurance:['insuranceStatus','viewInsurance'],registration:['registrationStatus','viewRegistration'],inspection:['inspectionStatus','viewInspection']};
+  const [sid,bid]=map[kind],s=$(sid),b=$(bid);
+  if(s)s.textContent=text;
+  if(b){b.disabled=!url;b.onclick=url?()=>window.open(url,'_blank','noopener'):null}
+}
+async function signedVehicleDoc(sb,path){
+  const {data,error}=await sb.storage.from('vehicle-documents').createSignedUrl(path,600);
+  if(error)throw error;
+  return data?.signedUrl||data?.signedURL||'';
+}
+async function renderVehicle(){
+  if(!day)return;
+  const token=++vehicleLoadToken;
+  $('vehicleViewName').textContent=day.vehicle||'Selected Vehicle';
+  $('vehicleViewSub').textContent=`Documents assigned to ${day.vehicle||'this vehicle'}.`;
+  setDocState('insurance','Checking availability…');
+  setDocState('registration','Checking availability…');
+  setDocState('inspection','Checking availability…');
+  $('vehicleCloudText').textContent='Connecting to vehicle documents…';
+  $('vehicleCloudState').querySelector('.status-dot').className='status-dot';
+
+  if(!cloudConfigured()){
+    $('vehicleCloudText').textContent='Vehicle Documents is built and ready. The Supabase Publishable key still needs to be added once.';
+    setDocState('insurance','Cloud connection not configured');
+    setDocState('registration','Cloud connection not configured');
+    setDocState('inspection','Cloud connection not configured');
+    return;
+  }
+
+  try{
+    const sb=await getCloud();
+    const {data:rows,error}=await sb.from('vehicles')
+      .select('name,storage_folder,active,insurance_expiration,registration_expiration,safety_inspection_expiration')
+      .eq('name',day.vehicle).eq('active',true).limit(1);
+    if(error)throw error;
+    if(token!==vehicleLoadToken)return;
+
+    const vehicle=rows?.[0];
+    if(!vehicle)throw new Error(`No vehicle record found for ${day.vehicle}.`);
+    const folder=vehicle.storage_folder;
+
+    const jobs=[
+      ['insurance',`${folder}/insurance-card.jpeg`,vehicle.insurance_expiration],
+      ['registration',`${folder}/registration.jpeg`,vehicle.registration_expiration],
+      ['inspection',`${folder}/safety-inspection.jpeg`,vehicle.safety_inspection_expiration]
+    ];
+
+    for(const [kind,path,expires] of jobs){
+      try{
+        const url=await signedVehicleDoc(sb,path);
+        const exp=expires?` • Expires ${new Date(expires+'T12:00:00').toLocaleDateString()}`:'';
+        setDocState(kind,`Available${exp}`,url);
+      }catch(e){
+        setDocState(kind,kind==='inspection'?'Not uploaded yet':'Document not found');
+      }
+    }
+
+    $('vehicleCloudState').querySelector('.status-dot').className='status-dot ok';
+    $('vehicleCloudText').textContent='Connected. View buttons open private temporary links.';
+  }catch(e){
+    console.error(e);
+    $('vehicleCloudState').querySelector('.status-dot').className='status-dot bad';
+    $('vehicleCloudText').textContent=e?.message||'Could not load vehicle documents.';
+    setDocState('insurance','Unavailable');
+    setDocState('registration','Unavailable');
+    setDocState('inspection','Unavailable');
+  }
+}
 
 function locationKind(n){
   if(['Darwill McCook','Darwill Hillside'].includes(n))return'darwill';
@@ -378,7 +520,7 @@ function showReport(d,celebrate=false){
   $('report').innerHTML=`<div class="print-report">${celebrate?`<div class="celebrate"><div class="check">✓</div><h1 style="margin-top:14px">Shift Complete</h1><p>Everything has been saved.</p></div>`:''}<div class="print-header"><h1>Daily Driver Time Sheet</h1><div class="meta"><div><strong>Driver:</strong> ${esc(d.driver)}</div><div><strong>Date:</strong> ${esc(d.date)}</div><div><strong>Vehicle:</strong> ${esc(d.vehicle)}</div><div><strong>Shift:</strong> ${t12(d.start)} - ${t12(d.end)}</div>${d.startingTrailer?`<div><strong>Trailer:</strong> ${esc(d.startingTrailer)}</div>`:''}</div></div><div class="print-section-title">Activity Log</div><table class="print-activity-table"><thead><tr><th>#</th><th>Start</th><th>End</th><th>Time</th><th>Activity</th><th>Location / Address</th><th>Detail</th><th>Notes</th></tr></thead><tbody>${rows||`<tr><td colspan="8">No activities recorded.</td></tr>`}</tbody></table><div class="print-summary"><div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>PRODUCTIVITY</span><b>${t.pct.toFixed(1)}%</b></div></div>${pretripReport(d.pretrip)}</div>`;
   $('reportCard').classList.remove('hidden');
   if(celebrate){
-    ['resumeCard','startScreen','activeScreen','timelineView','summaryView','settingsView','historyView'].forEach(id=>$(id)?.classList.add('hidden'));
+    ['resumeCard','startScreen','activeScreen','timelineView','summaryView','vehicleView','settingsView','historyView'].forEach(id=>$(id)?.classList.add('hidden'));
     $('bottomBar').classList.add('hidden');
     window.scrollTo({top:0,behavior:'smooth'})
   }else{

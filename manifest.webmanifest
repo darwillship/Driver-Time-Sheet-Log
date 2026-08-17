@@ -1,11 +1,12 @@
 {
   "name": "Driver Time Sheet Log",
   "short_name": "Driver Log",
-  "start_url": "./",
+  "description": "Mobile driver time sheet, pre-trip inspection, and vehicle document access.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f6f8",
-  "theme_color": "#f7f8fa",
-  "description": "Mobile driver activity and time sheet log.",
+  "background_color": "#0f1217",
+  "theme_color": "#0f1217",
   "icons": [
     {
       "src": "icon.svg",
