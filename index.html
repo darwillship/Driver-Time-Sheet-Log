@@ -330,6 +330,9 @@ async function updateDispatchRoute(id,status){
     payload.completed_at=status==='completed'?new Date().toISOString():null;
     const {error}=await sb.from('dispatch_tasks').update(payload).eq('id',id);
     if(error)throw error;
+    if(status==='in_progress')day.activeDispatchRouteId=id;
+    if(status==='completed'&&Number(day.activeDispatchRouteId)===Number(id))day.activeDispatchRouteId=null;
+    save();
     toast(status==='completed'?'Route completed':'Route started');
     await renderMyRoutes();
   }catch(e){toast('Route update failed');console.error(e)}
@@ -536,13 +539,42 @@ function confirmActivity(){
   if(type==='Drop & Hook'){meta.trailerAction=$('trailerAction').value;meta.trailer=$('trailerChoice').value}
   startActivity(type,location,address,notes,meta);hideActivityPanels();toast(`${type} started`);
 }
+async function syncCurrentActivityToDispatch(activity){
+  try{
+    if(!driverDirectory.length)await loadDriverDirectory();
+    const driver=currentDriverRecord(); if(!driver)return;
+    const sb=await getCloud();
+    await sb.from('task_activity').update({active:false,ended_at:new Date().toISOString()}).eq('driver_id',driver.id).eq('active',true);
+    const payload={
+      driver_id:driver.id,
+      dispatch_task_id:day?.activeDispatchRouteId||null,
+      activity_type:activity.type,
+      started_at:activity.startedAt||new Date().toISOString(),
+      ended_at:null,
+      active:true,
+      location:activity.location||null,
+      notes:activity.notes||null
+    };
+    const {error}=await sb.from('task_activity').insert(payload);
+    if(error)throw error;
+  }catch(e){console.warn('Live activity sync failed',e);toast('Activity saved locally; dashboard sync failed')}
+}
+async function closeLiveDispatchActivity(){
+  try{
+    if(!driverDirectory.length)await loadDriverDirectory();
+    const driver=currentDriverRecord(); if(!driver)return;
+    const sb=await getCloud();
+    await sb.from('task_activity').update({active:false,ended_at:new Date().toISOString()}).eq('driver_id',driver.id).eq('active',true);
+  }catch(e){console.warn('Could not close live activity',e)}
+}
 function startActivity(type,location='',address='',notes='',meta={}){
   if(cur())endCurrent(false);
-  day.activities.push({id:crypto.randomUUID?.()||Date.now()+'',type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta});
-  save();renderCurrent();renderTimeline();
+  const activity={id:crypto.randomUUID?.()||Date.now()+'',type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta};
+  day.activities.push(activity);
+  save();renderCurrent();renderTimeline();syncCurrentActivityToDispatch(activity);
 }
 function endCurrent(r=true){
-  const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();save();if(r){renderCurrent();renderTimeline();renderSummary()}}
+  const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();save();closeLiveDispatchActivity();if(r){renderCurrent();renderTimeline();renderSummary()}}
 }
 function arriveFromDriving(){
   const c=cur();if(!c||c.type!=='Driving')return;
