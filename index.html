@@ -542,30 +542,35 @@ function confirmActivity(){
 async function syncCurrentActivityToDispatch(activity){
   try{
     if(!driverDirectory.length)await loadDriverDirectory();
-    const driver=currentDriverRecord(); if(!driver)return;
+    const driver=currentDriverRecord(); if(!driver)throw new Error('Driver record not found');
     const sb=await getCloud();
-    await sb.from('task_activity').update({active:false,ended_at:new Date().toISOString()}).eq('driver_id',driver.id).eq('active',true);
     const payload={
       driver_id:driver.id,
-      dispatch_task_id:day?.activeDispatchRouteId||null,
+      driver_name:driver.name,
       activity_type:activity.type,
+      activity_location:activity.location||null,
+      activity_notes:activity.notes||null,
+      dispatch_task_id:day?.activeDispatchRouteId||null,
       started_at:activity.startedAt||new Date().toISOString(),
-      ended_at:null,
-      active:true,
-      location:activity.location||null,
-      notes:activity.notes||null
+      updated_at:new Date().toISOString(),
+      active:true
     };
-    const {error}=await sb.from('task_activity').insert(payload);
+    const {error}=await sb.from('driver_live_status').upsert(payload,{onConflict:'driver_id'});
     if(error)throw error;
-  }catch(e){console.warn('Live activity sync failed',e);toast('Activity saved locally; dashboard sync failed')}
+  }catch(e){console.error('Live activity sync failed',e);toast('Dashboard sync failed')}
 }
 async function closeLiveDispatchActivity(){
   try{
     if(!driverDirectory.length)await loadDriverDirectory();
     const driver=currentDriverRecord(); if(!driver)return;
     const sb=await getCloud();
-    await sb.from('task_activity').update({active:false,ended_at:new Date().toISOString()}).eq('driver_id',driver.id).eq('active',true);
-  }catch(e){console.warn('Could not close live activity',e)}
+    const {error}=await sb.from('driver_live_status').upsert({
+      driver_id:driver.id,driver_name:driver.name,activity_type:null,activity_location:null,
+      activity_notes:null,dispatch_task_id:day?.activeDispatchRouteId||null,
+      started_at:null,updated_at:new Date().toISOString(),active:false
+    },{onConflict:'driver_id'});
+    if(error)throw error;
+  }catch(e){console.warn('Could not clear dashboard activity',e)}
 }
 function startActivity(type,location='',address='',notes='',meta={}){
   if(cur())endCurrent(false);
