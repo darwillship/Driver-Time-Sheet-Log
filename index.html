@@ -285,7 +285,12 @@ async function loadDriverDirectory(){
     const previous=sel.value;
     sel.innerHTML='<option value="">Select driver…</option>'+driverDirectory.map(d=>`<option value="${esc(d.name)}" data-driver-id="${d.id}">${esc(d.name)}</option>`).join('');
     if(previous&&driverDirectory.some(d=>d.name===previous))sel.value=previous;
-  }catch(e){ console.warn('Driver directory unavailable',e); }
+  }catch(e){
+    console.warn('Driver directory unavailable',e);
+    const sel=$('driver');
+    if(sel)sel.innerHTML='<option value="">Unable to load drivers</option>';
+    toast('Could not load driver list');
+  }
 }
 function currentDriverRecord(){
   const name=(day?.driver||$('driver').value||'').trim().toLowerCase();
@@ -335,18 +340,14 @@ function cloudConfigured(){
     !SUPABASE_PUBLISHABLE_KEY.includes('__SUPABASE_');
 }
 async function getCloud(){
-  if(cloud)return cloud;
-  if(!cloudConfigured())throw new Error('Supabase Publishable key has not been added yet.');
-  if(!window.supabase?.createClient)throw new Error('Cloud library did not load. Check internet access.');
-  cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
-  });
-  let {data:{session}}=await cloud.auth.getSession();
-  if(!session){
-    const {error}=await cloud.auth.signInAnonymously();
-    if(error)throw error;
+  if(!cloudConfigured())throw new Error('Supabase is not configured.');
+  if(!window.supabase)throw new Error('Supabase library did not load.');
+  if(!window.__dispatchSupabase){
+    window.__dispatchSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    });
   }
-  return cloud;
+  return window.__dispatchSupabase;
 }
 function setDocState(kind,text,url=''){
   const map={insurance:['insuranceStatus','viewInsurance'],registration:['registrationStatus','viewRegistration'],inspection:['inspectionStatus','viewInspection']};
