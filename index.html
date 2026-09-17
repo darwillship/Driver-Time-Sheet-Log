@@ -142,7 +142,9 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 <header class="appbar"><div class="bar"><div><div class="app-title" id="greeting">Driver Time Sheet Log</div><div class="chip hidden" id="weatherChip"></div></div><div class="bar-right"><div class="chip" id="headerDate"></div></div></div></header>
 <main><div class="toast" id="toast"></div>
 <section class="card hidden" id="resumeCard"><div class="eyebrow">Unfinished shift</div><h2>Resume your day?</h2><p id="resumeText"></p><div class="actions grid2"><button class="btn dark" id="resumeBtn">Resume Shift</button><button class="btn danger" id="discardBtn">Discard Shift</button></div></section>
-<section class="card hero" id="startScreen"><div class="eyebrow">Welcome back</div><h1>Track the day.<br>Skip the paperwork.</h1><p>Start the shift, then log each activity with a few taps.</p><div class="stack"><div class="field"><label>Driver name</label><input class="control" id="driver" placeholder="Enter driver name" autocomplete="name"></div><div class="field"><label>Vehicle</label><select class="control" id="vehicle"><option value="">Select vehicle</option><option>McCook Van</option><option>McCook Hillside</option><option>Sterling 65</option><option>Sterling 66</option><option>International</option><option>Freightliner</option><option>Semi-Truck</option></select></div><div class="field hidden" id="trailerWrap"><label>Starting trailer</label><select class="control" id="startingTrailer"><option value="">No trailer / Bobtail</option><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div><div class="grid2"><div class="field"><label>Date</label><input class="control" id="date" type="date"></div><div class="field"><label>Start time</label><input class="control" id="startTime" type="time"></div></div></div><div id="pretripStatus" class="pretrip-status"></div>
+<section class="card hero" id="startScreen"><div class="eyebrow">Welcome back</div><h1>Track the day.<br>Skip the paperwork.</h1><p>Start the shift, then log each activity with a few taps.</p><div class="stack"><div class="field"><label>Driver name</label><select id="driver">
+<option value="">Loading drivers…</option>
+</select></div><div class="field"><label>Vehicle</label><select class="control" id="vehicle"><option value="">Select vehicle</option><option>McCook Van</option><option>McCook Hillside</option><option>Sterling 65</option><option>Sterling 66</option><option>International</option><option>Freightliner</option><option>Semi-Truck</option></select></div><div class="field hidden" id="trailerWrap"><label>Starting trailer</label><select class="control" id="startingTrailer"><option value="">No trailer / Bobtail</option><option>53-Foot Trailer 1</option><option>53-Foot Trailer 2</option></select></div><div class="grid2"><div class="field"><label>Date</label><input class="control" id="date" type="date"></div><div class="field"><label>Start time</label><input class="control" id="startTime" type="time"></div></div></div><div id="pretripStatus" class="pretrip-status"></div>
 <div class="actions">
   <button class="btn primary" id="pretripBtn">Continue to Pre-Trip</button>
   <button class="btn primary hidden" id="startBtn">Start Shift</button>
@@ -277,7 +279,12 @@ async function loadDriverDirectory(){
     const sb=await getCloud();
     const {data,error}=await sb.from('drivers').select('id,name,active').eq('active',true).order('name');
     if(error)throw error;
-    driverDirectory=data||[];
+    const excluded=new Set(['sergi','washington','quick delivery']);
+    driverDirectory=(data||[]).filter(d=>!excluded.has((d.name||'').trim().toLowerCase()));
+    const sel=$('driver');
+    const previous=sel.value;
+    sel.innerHTML='<option value="">Select driver…</option>'+driverDirectory.map(d=>`<option value="${esc(d.name)}" data-driver-id="${d.id}">${esc(d.name)}</option>`).join('');
+    if(previous&&driverDirectory.some(d=>d.name===previous))sel.value=previous;
   }catch(e){ console.warn('Driver directory unavailable',e); }
 }
 function currentDriverRecord(){

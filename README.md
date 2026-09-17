@@ -89,3 +89,10 @@ Changes:
 - Drivers receive read-only access; the app does not upload, replace, edit, or delete fleet documents.
 - The current build contains the Supabase Project URL but intentionally leaves the **Publishable key** as a placeholder until the owner supplies it.
 - The app is prepared to use Supabase Anonymous Sign-Ins so drivers do not need to type a cloud username or password once Anonymous Sign-Ins are enabled.
+
+
+## v1.4.2
+- Driver Name is now a Supabase-powered dropdown.
+- Only Darwill employee drivers appear in the Driver Time Sheet.
+- Sergi, Washington, and Quick Delivery remain Dispatch Dashboard-only.
+- Selected driver maps directly to the Supabase driver record used by My Routes.
