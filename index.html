@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f6f8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>Driver Time Sheet Log</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>Driver Time Sheet Log v1.6.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--ink:#151922;--muted:#717784;--line:#e3e7ed;--green:#15865b;--green2:#0f6d49;--red:#ca4037;--blue:#2869df;--yellow:#d99a00;--orange:#dd7900;--shadow:0 16px 46px rgba(20,26,36,.08);--r:24px}
@@ -138,6 +138,9 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 .route-card.completed{border-left-color:#16a34a;background:color-mix(in srgb,#f0fdf4 60%,var(--card))}
 .route-title{font-size:1rem;font-weight:900;margin-bottom:5px}.route-meta{font-size:.78rem;color:var(--muted);line-height:1.55}.route-actions{display:flex;gap:8px;margin-top:12px}.route-actions .btn{padding:10px 12px}
 .route-status{display:inline-block;font-size:.68rem;font-weight:900;text-transform:uppercase;padding:5px 8px;border-radius:999px;background:var(--bg);margin-bottom:8px}
+.route-card.current-route{border:2px solid color-mix(in srgb,var(--green) 70%,var(--line));border-left:6px solid var(--green);padding:18px}
+.route-card.current-route .route-title{font-size:1.12rem}.route-support{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.route-support .btn{min-height:48px;font-size:.86rem;padding:10px}.route-now{margin-top:12px;border:1px solid var(--line);border-radius:15px;padding:12px;background:color-mix(in srgb,var(--bg) 72%,var(--card))}.route-now strong{display:block}.route-now small{display:block;color:var(--muted);margin-top:3px}.queued-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:var(--muted);margin:16px 2px 8px}.compact-shift{padding:16px 18px}.compact-shift .profile{padding-bottom:0;border-bottom:0}.route-empty{padding:18px;text-align:center;color:var(--muted)}
+
 
 .home-routes-card{border-color:#344052;background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 92%,#16a34a 8%))}
 .home-routes-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -156,12 +159,12 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
   <button class="btn primary" id="pretripBtn">Continue to Pre-Trip</button>
   <button class="btn primary hidden" id="startBtn">Start Shift</button>
 </div></section>
-<section class="hidden" id="activeScreen"><section class="card home-routes-card" id="homeRoutesCard">
-<div class="eyebrow">Dispatch</div>
-<div class="home-routes-head"><div><h2>My Routes</h2><p>Today's routes assigned to you.</p></div><button class="route-refresh" id="refreshRoutes" type="button">↻</button></div>
+<section class="hidden" id="activeScreen"><section class="card compact-shift"><div class="profile"><div class="person"><div class="avatar" id="avatarBox">👤</div><div><b id="driverLine"></b><small id="shiftLine"></small></div></div><div class="live">SHIFT ACTIVE</div></div></section><section class="card home-routes-card" id="homeRoutesCard">
+<div class="eyebrow">Current work</div>
+<div class="home-routes-head"><div><h2>My Route</h2><p id="routeWorkflowSub">Your dispatch and activity work together here.</p></div><button class="route-refresh" id="refreshRoutes" type="button">↻</button></div>
 <div class="cloud-state" id="routesCloudState"><span class="status-dot"></span><span id="routesCloudText">Loading assigned routes…</span></div>
 <div class="route-list" id="myRoutes"></div>
-</section><section class="card"><div class="profile"><div class="person"><div class="avatar" id="avatarBox">👤</div><div><b id="driverLine"></b><small id="shiftLine"></small></div></div><div class="live">SHIFT ACTIVE</div></div><div class="current"><div class="ring"><svg viewBox="0 0 188 188"><circle class="track" cx="94" cy="94" r="82"></circle><circle class="fill" id="ringFill" cx="94" cy="94" r="82"></circle></svg><div class="ring-content"><div class="current-icon" id="currentIcon">＋</div><div class="current-name" id="currentName">No Activity</div><div class="clock" id="timer">00:00</div></div></div><div class="sub" id="startedLine">Select an activity when work begins.</div></div><div id="mainControls"></div><div class="metrics"><div class="metric"><b id="shiftMetric">0m</b><span>SHIFT</span></div><div class="metric"><b id="productiveMetric">0m</b><span>PRODUCTIVE</span></div><div class="metric"><b id="waitingMetric">0m</b><span>WAITING</span></div></div></section><section class="card hidden" id="activityCard"><div class="eyebrow">New entry</div><h2>Start Activity</h2><div class="activity-grid" id="activityGrid"></div><div class="actions"><button class="btn soft" id="cancelActivity">Cancel</button></div></section><section class="card hidden" id="detailsCard"><div class="eyebrow">Activity details</div><h2 id="detailsTitle">Details</h2><div id="detailsContent"></div></section></section>
+</section><section class="card hidden" id="activityStatusCard"><div class="eyebrow">Current activity</div><div class="current"><div class="ring"><svg viewBox="0 0 188 188"><circle class="track" cx="94" cy="94" r="82"></circle><circle class="fill" id="ringFill" cx="94" cy="94" r="82"></circle></svg><div class="ring-content"><div class="current-icon" id="currentIcon">＋</div><div class="current-name" id="currentName">No Activity</div><div class="clock" id="timer">00:00</div></div></div><div class="sub" id="startedLine"></div></div><div id="mainControls"></div><div class="metrics"><div class="metric"><b id="shiftMetric">0m</b><span>SHIFT</span></div><div class="metric"><b id="productiveMetric">0m</b><span>PRODUCTIVE</span></div><div class="metric"><b id="waitingMetric">0m</b><span>WAITING</span></div></div></section><section class="card hidden" id="activityCard"><div class="eyebrow">New entry</div><h2>Start Activity</h2><div class="activity-grid" id="activityGrid"></div><div class="actions"><button class="btn soft" id="cancelActivity">Cancel</button></div></section><section class="card hidden" id="detailsCard"><div class="eyebrow">Activity details</div><h2 id="detailsTitle">Details</h2><div id="detailsContent"></div></section></section>
 <section id="timelineView" class="hidden"><section class="card"><div class="eyebrow">Today</div><h2>Activity Timeline</h2><div id="timeline"></div></section></section>
 <section id="summaryView" class="hidden"><section class="card"><div class="eyebrow">Live summary</div><h2>Today at a glance</h2><div class="barprog"><i id="productivityBar" style="width:0%"></i></div><p id="summaryText" style="margin-top:8px"></p><div class="summary-grid" id="liveSummary"></div></section></section>
 <section id="historyView" class="hidden"><section class="card"><div class="eyebrow">Saved on this device</div><h2>Shift History</h2><div id="history"></div><div class="actions grid2"><button class="btn soft" id="csvAll">Export All CSV</button><button class="btn soft" id="jsonAll">Export All JSON</button></div></section></section>
@@ -320,30 +323,70 @@ async function renderMyRoutes(){
     if(error)throw error;
     const target=day?.date||today();
     const routes=(data||[]).filter(r=>!r.scheduled_at||localDateOf(r.scheduled_at)===target);
-    state.textContent=routes.length?`${routes.length} route${routes.length===1?'':'s'} assigned for today.`:'No routes assigned for today.';
-    host.innerHTML=routes.map(r=>{
+    const active=routes.find(r=>(r.status||'').toLowerCase().replace(' ','_')==='in_progress')||null;
+    const open=routes.filter(r=>!['completed','in_progress'].includes((r.status||'pending').toLowerCase().replace(' ','_')));
+    const completed=routes.filter(r=>(r.status||'').toLowerCase()==='completed');
+    state.textContent=active?`Current route in progress • ${open.length} remaining`:(open.length?`${open.length} route${open.length===1?'':'s'} ready to work.`:'No routes remaining for today.');
+    const routeCard=(r,isCurrent=false)=>{
       const st=(r.status||'pending').toLowerCase().replace(' ','_');
       const when=r.scheduled_at?new Date(r.scheduled_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'No scheduled time';
-      return `<div class="route-card ${st}"><div class="route-status">${esc(routeStatusLabel(st))}</div><div class="route-title">${esc(r.pickup_name)} → ${esc(r.delivery_name)}</div><div class="route-meta">${esc(when)}${r.job_client?' • '+esc(r.job_client):''}${r.pallet_qty!=null?' • '+esc(r.pallet_qty)+' pallets':''}<br>${esc(r.pickup_address||'')}${r.delivery_address?'<br>→ '+esc(r.delivery_address):''}${r.instructions?'<br><strong>Instructions:</strong> '+esc(r.instructions):''}</div><div class="route-actions">${st!=='in_progress'&&st!=='completed'?`<button class="btn primary" data-start-route="${r.id}">Start Route</button>`:''}${st!=='completed'?`<button class="btn soft" data-complete-route="${r.id}">Complete</button>`:''}</div></div>`;
-    }).join('');
-    host.querySelectorAll('[data-start-route]').forEach(b=>b.onclick=()=>updateDispatchRoute(Number(b.dataset.startRoute),'in_progress'));
-    host.querySelectorAll('[data-complete-route]').forEach(b=>b.onclick=()=>updateDispatchRoute(Number(b.dataset.completeRoute),'completed'));
-  }catch(e){state.textContent='Could not load routes: '+e.message}
+      const c=cur();
+      const currentActivity=isCurrent&&c?`<div class="route-now"><strong>${esc(c.type)} • ${clock(secs(c))}</strong><small>${esc(c.location||r.delivery_name||'Route activity')}</small></div>`:'';
+      let actions='';
+      if(isCurrent){
+        if(!c){actions=`<div class="route-support"><button class="btn primary" data-route-act="Driving" data-route-id="${r.id}">🚚 Drive</button><button class="btn soft" data-route-act="Waiting" data-route-id="${r.id}">⏳ Waiting</button><button class="btn soft" data-route-act="Unloading" data-route-id="${r.id}">📥 Unload / Drop-off</button><button class="btn soft" data-route-act="Fueling" data-route-id="${r.id}">⛽ Fuel Stop</button><button class="btn soft" data-route-act="Lunch" data-route-id="${r.id}">🍽️ Lunch</button><button class="btn soft" data-route-act="Other" data-route-id="${r.id}">••• Other</button></div><div class="actions"><button class="btn dark" data-complete-route="${r.id}">Complete Route</button></div>`;}
+        else actions=`<div class="actions"><button class="btn dark" data-finish-route-act="${r.id}">${c.type==='Driving'?'Arrived':'Done '+esc(c.type)}</button>${c.type==='Driving'?`<button class="btn soft" data-route-act="Fueling" data-route-id="${r.id}">⛽ Fuel Stop</button>`:''}<button class="btn soft" data-complete-route="${r.id}">Complete Route</button></div>`;
+      }else if(st!=='completed') actions=`<div class="route-actions"><button class="btn primary" data-start-route="${r.id}">Start Route</button></div>`;
+      return `<div class="route-card ${st} ${isCurrent?'current-route':''}"><div class="route-status">${isCurrent?'CURRENT ROUTE':esc(routeStatusLabel(st))}</div><div class="route-title">${esc(r.pickup_name)} → ${esc(r.delivery_name)}</div><div class="route-meta">${esc(when)}${r.job_client?' • '+esc(r.job_client):''}${r.pallet_qty!=null?' • '+esc(r.pallet_qty)+' pallets':''}<br>${esc(r.pickup_address||'')}${r.delivery_address?'<br>→ '+esc(r.delivery_address):''}${r.instructions?'<br><strong>Instructions:</strong> '+esc(r.instructions):''}</div>${currentActivity}${actions}</div>`;
+    };
+    let html='';
+    if(active)html+=routeCard(active,true);
+    if(open.length){html+=`<div class="queued-label">${active?'Next assigned routes':'Assigned routes'}</div>`+open.map(r=>routeCard(r,false)).join('');}
+    if(!active&&!open.length)html='<div class="route-empty">All assigned routes are complete for today.</div>';
+    if(completed.length)html+=`<div class="queued-label">Completed today (${completed.length})</div>`+completed.map(r=>routeCard(r,false)).join('');
+    host.innerHTML=html;
+    $('activityStatusCard')?.classList.toggle('hidden',!active);
+    host.querySelectorAll('[data-start-route]').forEach(b=>b.onclick=()=>startDispatchRoute(Number(b.dataset.startRoute),routes));
+    host.querySelectorAll('[data-complete-route]').forEach(b=>b.onclick=()=>completeDispatchRoute(Number(b.dataset.completeRoute)));
+    host.querySelectorAll('[data-route-act]').forEach(b=>b.onclick=()=>startRouteSupport(b.dataset.routeAct,Number(b.dataset.routeId),routes));
+    host.querySelectorAll('[data-finish-route-act]').forEach(b=>b.onclick=()=>finishRouteActivity(Number(b.dataset.finishRouteAct)));
+  }catch(e){state.textContent='Could not load routes: '+e.message;console.error(e)}
 }
-document.addEventListener('click',e=>{if(e.target?.id==='refreshRoutes')renderMyRoutes()});
-async function updateDispatchRoute(id,status){
+async function startDispatchRoute(id,routes=[]){
   try{
-    const sb=await getCloud(),payload={status};
-    payload.completed_at=status==='completed'?new Date().toISOString():null;
-    const {error}=await sb.from('dispatch_tasks').update(payload).eq('id',id);
-    if(error)throw error;
-    if(status==='in_progress')day.activeDispatchRouteId=id;
-    if(status==='completed'&&Number(day.activeDispatchRouteId)===Number(id))day.activeDispatchRouteId=null;
-    save();
-    toast(status==='completed'?'Route completed':'Route started');
-    await renderMyRoutes();
+    const r=routes.find(x=>Number(x.id)===Number(id)); if(!r)return;
+    const sb=await getCloud();
+    const {error}=await sb.from('dispatch_tasks').update({status:'in_progress',completed_at:null}).eq('id',id);if(error)throw error;
+    day.activeDispatchRouteId=id;day.currentLocation=r.pickup_name||day.currentLocation||'';save();
+    startActivity('Driving',`${r.pickup_name||'Pickup'} → ${r.delivery_name||'Destination'}`,[r.pickup_address,r.delivery_address].filter(Boolean).join(' → '),'',{origin:r.pickup_name||'',destination:r.delivery_name||'',dispatchRouteId:id});
+    toast(`Route started • Driving to ${r.delivery_name||'destination'}`);await renderMyRoutes();
   }catch(e){toast('Route update failed');console.error(e)}
 }
+function startRouteSupport(type,id,routes=[]){
+  const r=routes.find(x=>Number(x.id)===Number(id));if(!r)return;
+  day.activeDispatchRouteId=id;save();
+  if(type==='Driving')startActivity('Driving',`${r.pickup_name||day.currentLocation||'Pickup'} → ${r.delivery_name||'Destination'}`,[r.pickup_address,r.delivery_address].filter(Boolean).join(' → '),'',{origin:r.pickup_name||day.currentLocation||'',destination:r.delivery_name||'',dispatchRouteId:id});
+  else if(type==='Waiting')startActivity('Waiting',r.delivery_name||day.currentLocation||'',r.delivery_address||'','',{reason:'Waiting at route stop',dispatchRouteId:id});
+  else if(type==='Unloading')startActivity('Unloading',r.delivery_name||day.currentLocation||'',r.delivery_address||'','',{dispatchRouteId:id});
+  else if(type==='Fueling')startActivity('Fueling','En route','','',{resumeRoute:true,dispatchRouteId:id});
+  else if(type==='Lunch')startActivity('Lunch',day.currentLocation||'','','',{dispatchRouteId:id});
+  else openDetails('Other',r.delivery_name||day.currentLocation||'');
+  renderMyRoutes();
+}
+function finishRouteActivity(id){
+  const c=cur();if(!c)return;
+  if(c.type==='Driving')arriveFromDriving();else endCurrent();
+  renderMyRoutes();
+}
+async function completeDispatchRoute(id){
+  try{
+    if(cur())endCurrent(false);
+    const sb=await getCloud();
+    const {error}=await sb.from('dispatch_tasks').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;
+    if(Number(day.activeDispatchRouteId)===Number(id))day.activeDispatchRouteId=null;save();renderCurrent();toast('Route completed');await renderMyRoutes();
+  }catch(e){toast('Route update failed');console.error(e)}
+}
+async function updateDispatchRoute(id,status){return status==='completed'?completeDispatchRoute(id):renderMyRoutes()}
 function cloudConfigured(){
   return SUPABASE_URL.startsWith('https://') &&
     SUPABASE_PUBLISHABLE_KEY &&
@@ -471,6 +514,7 @@ function showNextActions(location,lastType=''){
 }
 function renderCurrent(){
   if(!day)return;
+  $('activityStatusCard')?.classList.toggle('hidden',!day.activeDispatchRouteId);
   const c=cur(),t=totals(day);
   $('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();
   if(c){
@@ -495,10 +539,10 @@ function renderCurrent(){
       $('finish').onclick=()=>finishGuided(c);$('endShift').onclick=openEnd;
     }
   }else{
-    $('currentIcon').textContent='＋';$('currentName').textContent='No Activity';$('timer').textContent='00:00';
-    $('startedLine').textContent=day.currentLocation?`Current location: ${day.currentLocation}`:'Select an activity when work begins.';
-    $('mainControls').innerHTML=`<div class="actions"><button class="btn primary" id="startAct">${day.currentLocation?'Choose Next Step':'Start Activity'}</button><button class="btn danger" id="endShift">End Shift</button></div>`;
-    $('startAct').onclick=()=>day.currentLocation?showNextActions(day.currentLocation):openActivities();$('endShift').onclick=openEnd;
+    $('currentIcon').textContent='＋';$('currentName').textContent=day.activeDispatchRouteId?'Ready for next step':'No Active Route';$('timer').textContent='00:00';
+    $('startedLine').textContent=day.activeDispatchRouteId?'Choose the next route action above.':'Start an assigned route to begin.';
+    $('mainControls').innerHTML=`<div class="actions"><button class="btn danger" id="endShift">End Shift</button></div>`;
+    $('endShift').onclick=openEnd;
   }
 }
 function openActivities(){
