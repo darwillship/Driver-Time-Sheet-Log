@@ -17,7 +17,7 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 
 .event{display:grid;grid-template-columns:54px 1fr;gap:10px;margin-bottom:10px}.event-time{font-size:.76rem;color:var(--muted);font-weight:800;padding-top:13px}.event-body{border:1px solid var(--line);border-radius:18px;padding:13px 14px;background:var(--card)}.event-body.active{border-color:#9fd0ba;background:color-mix(in srgb,#eaf8f1 45%,var(--card))}.event-title{display:flex;justify-content:space-between;gap:8px;font-weight:900}.badge{font-size:.7rem;padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--bg) 75%,var(--card));white-space:nowrap}.event-meta{font-size:.79rem;color:var(--muted);margin-top:5px;line-height:1.4}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.sum{border:1px solid var(--line);border-radius:16px;padding:13px;background:color-mix(in srgb,var(--bg) 75%,var(--card))}.sum span{font-size:.72rem;color:var(--muted);font-weight:850}.sum b{display:block;font-size:1.15rem;margin-top:3px}.barprog{height:10px;background:var(--line);border-radius:99px;overflow:hidden}.barprog i{display:block;height:100%;background:var(--green);transition:width .5s}.celebrate{text-align:center;padding:20px}.check{width:76px;height:76px;margin:auto;border-radius:50%;background:#e7f6ef;color:var(--green);display:grid;place-items:center;font-size:2.3rem;animation:pop .45s ease}@keyframes pop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1)}}
-.bottom{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom))}.nav{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:7px 4px;border-radius:13px;font-size:.67rem;font-weight:800}.nav button span{display:block;font-size:1.25rem;margin-bottom:2px}.nav button.active{color:var(--green);background:color-mix(in srgb,#eaf6f0 55%,transparent)}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom))}.nav{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:7px 4px;border-radius:13px;font-size:.67rem;font-weight:800}.nav button span{display:block;font-size:1.25rem;margin-bottom:2px}.nav button.active{color:var(--green);background:color-mix(in srgb,#eaf6f0 55%,transparent)}
 
 .vehicle-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 .vehicle-icon{width:58px;height:58px;border-radius:18px;background:color-mix(in srgb,#e9f6f0 65%,var(--card));display:grid;place-items:center;font-size:1.75rem;flex:0 0 auto}
@@ -42,7 +42,7 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
   @page{size:Letter portrait;margin:.42in}
   :root{--bg:#fff;--card:#fff;--ink:#111;--muted:#444;--line:#cfd4da}
   html,body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#vehicleView,#settingsView,#historyView,#pretripScreen{display:none!important}
+  .appbar,.bottom,.no-print,#startScreen,#activeScreen,#timelineView,#summaryView,#routesView,#vehicleView,#settingsView,#historyView,#pretripScreen{display:none!important}
   main{max-width:none!important;padding:0!important;margin:0!important}
   #reportCard{display:block!important;background:#fff!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
   #report{color:#111!important}
@@ -131,6 +131,13 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 .screen-pretrip-summary{display:block}
 .print-pretrip{display:none}
 .print-address{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
+
+.route-list{display:grid;gap:12px}.route-card{border:1px solid var(--line);border-left:5px solid #2563eb;border-radius:18px;padding:16px;background:var(--card)}
+.route-card.pending{border-left-color:#dc2626;background:color-mix(in srgb,#fff1f2 55%,var(--card))}
+.route-card.in_progress{border-left-color:#eab308;background:color-mix(in srgb,#fffbeb 60%,var(--card))}
+.route-card.completed{border-left-color:#16a34a;background:color-mix(in srgb,#f0fdf4 60%,var(--card))}
+.route-title{font-size:1rem;font-weight:900;margin-bottom:5px}.route-meta{font-size:.78rem;color:var(--muted);line-height:1.55}.route-actions{display:flex;gap:8px;margin-top:12px}.route-actions .btn{padding:10px 12px}
+.route-status{display:inline-block;font-size:.68rem;font-weight:900;text-transform:uppercase;padding:5px 8px;border-radius:999px;background:var(--bg);margin-bottom:8px}
 </style></head><body>
 <header class="appbar"><div class="bar"><div><div class="app-title" id="greeting">Driver Time Sheet Log</div><div class="chip hidden" id="weatherChip"></div></div><div class="bar-right"><div class="chip" id="headerDate"></div></div></div></header>
 <main><div class="toast" id="toast"></div>
@@ -145,6 +152,12 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 <section id="summaryView" class="hidden"><section class="card"><div class="eyebrow">Live summary</div><h2>Today at a glance</h2><div class="barprog"><i id="productivityBar" style="width:0%"></i></div><p id="summaryText" style="margin-top:8px"></p><div class="summary-grid" id="liveSummary"></div></section></section>
 <section id="historyView" class="hidden"><section class="card"><div class="eyebrow">Saved on this device</div><h2>Shift History</h2><div id="history"></div><div class="actions grid2"><button class="btn soft" id="csvAll">Export All CSV</button><button class="btn soft" id="jsonAll">Export All JSON</button></div></section></section>
 
+<section id="routesView" class="hidden"><section class="card">
+<div class="eyebrow">Dispatch</div><h2>My Routes</h2>
+<p id="routesSub">Today's routes assigned to you.</p>
+<div class="cloud-state" id="routesCloudState"><span class="status-dot"></span><span id="routesCloudText">Loading assigned routes…</span></div>
+<div class="route-list" id="myRoutes"></div>
+</section></section>
 <section id="vehicleView" class="hidden">
   <section class="card">
     <div class="eyebrow">Assigned Vehicle</div>
@@ -237,13 +250,13 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 
 
 </main>
-<div class="bottom hidden" id="bottomBar"><div class="nav"><button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="timeline"><span>≡</span>Timeline</button><button data-view="summary"><span>◔</span>Summary</button><button data-view="vehicle"><span>🚚</span>Vehicle</button><button data-view="settings"><span>⚙</span>Settings</button></div></div>
+<div class="bottom hidden" id="bottomBar"><div class="nav"><button data-view="home" class="active"><span>⌂</span>Home</button><button data-view="timeline"><span>≡</span>Timeline</button><button data-view="summary"><span>◔</span>Summary</button><button data-view="routes"><span>⇄</span>Routes</button><button data-view="vehicle"><span>🚚</span>Vehicle</button><button data-view="settings"><span>⚙</span>Settings</button></div></div>
 <dialog id="endDialog"><div class="dialog-body"><div class="eyebrow">Finish the day</div><h2>End Shift</h2><div class="field"><label>End time</label><input class="control" id="endTime" type="time"></div><p id="endError" class="hidden" style="color:var(--red);font-weight:800"></p><div class="actions"><button class="btn primary" id="confirmEnd">Save Completed Shift</button><button class="btn soft" id="cancelEnd">Cancel</button></div></div></dialog>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),K={active:'dt-v11-active',history:'dt-v11-history',profile:'dt-v11-profile',recent:'dt-v11-recent',theme:'dt-v11-theme',avatar:'dt-v11-avatar',weather:'dt-v11-weather',pretrip:'dt-v11-pretrip-pending'};
 const SUPABASE_URL='https://hqhfstosclasgwgxubip.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='__SUPABASE_PUBLISHABLE_KEY__';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_01rvOlUuiba6260MPA1g4A_5oFgpGCk';
 let cloud=null,vehicleLoadToken=0;
 const places=[['ALG','1053 N Schmidt Rd, Romeoville, IL 60446'],['ENRU','1000 Windham Pkwy, Bolingbrook, IL 60490'],['Darwill Hillside','11900 Roosevelt Rd, Hillside, IL 60162'],['Darwill McCook','8701 47th St Ste C, McCook, IL 60525'],['South Suburban Post Office','6801 W 73rd St, Bedford Park, IL 60499'],['Fox Valley Post Office','3900 Gabrielle Ln, Aurora, IL 60598'],['Carol Stream Post Office','550 E Fullerton Ave, Carol Stream, IL 60188'],['Worth Post Office','11114 S Harlem Ave, Worth, IL 60482'],['Bolingbrook Post Office','105 Canterbury Ln, Bolingbrook, IL 60440'],['Darwill Oakbrook Tower Terrace','1 Tower Ln, Oakbrook Terrace, IL 60181'],['Envelopes Only','2000 S Park Ave, Streamwood, IL 60107'],['Federal Envelope','608 Country Club Dr, Bensenville, IL 60106'],['Universal Laminating','910 Carlow Dr Ste A, Bolingbrook, IL 60490'],['Platinum Converting','1560 W Stearns Rd, Bartlett, IL 60103'],['Victor Envelope','301 Arthur Ct, Bensenville, IL 60106'],['Supremex Naperville','1500 Shore Rd, Naperville, IL 60563'],['Supremex Chicago','4114 S Peoria St, Chicago, IL 60609']];
 const defs=[['Driving','🚚','Travel between locations'],['Loading','📦','Loading vehicle or trailer'],['Unloading','📥','Unloading at a stop'],['Pickup','⬆️','Picking up material'],['Delivery','⬇️','Delivering material'],['Waiting','⏳','Waiting for access or service'],['Fueling','⛽','Fuel stop'],['Lunch','🍽️','30-minute lunch'],['Drop & Hook','🔁','Hook, drop, or swap trailer'],['Vehicle issue','🔧','Mechanical or vehicle problem'],['Other','•••','Another work activity']],productive=new Set(['Driving','Loading','Unloading','Pickup','Delivery','Fueling','Drop & Hook']);let day=null,selected=null,pending='';
@@ -252,11 +265,63 @@ const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b},dur=(a,b)=>{le
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1700);navigator.vibrate?.(18)}function save(){if(day)write(K.active,day)}function cur(){return day?.activities.find(a=>!a.end)||null}function secs(a){return Math.max(0,Math.floor((Date.now()-new Date(a.startedAt).getTime())/1000))}function clock(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`}
 function totals(d,live=true){const shift=dur(d.start,d.end||(live?now():d.start));let p=0,w=0,l=0,drive=0;for(const a of d.activities){const n=a.end?dur(a.start,a.end):(live?Math.floor(secs(a)/60):0);if(productive.has(a.type))p+=n;if(a.type==='Waiting')w+=n;if(a.type==='Lunch')l+=n;if(a.type==='Driving')drive+=n}return{shift,p,w,l,drive,np:Math.max(0,shift-p),pct:shift?p/shift*100:0}}
 function greeting(){const h=new Date().getHours(),name=(day?.driver||$('driver').value||read(K.profile,{}).driver||'').split(' ')[0];$('greeting').textContent=`Good ${h<12?'Morning':h<17?'Afternoon':'Evening'}${name?', '+name:''}`}
-function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','vehicleView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));if(!day)return;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='vehicle'){$('vehicleView').classList.remove('hidden');renderVehicle()}if(view==='settings')$('settingsView').classList.remove('hidden')}
-function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');if(active){$('startScreen').classList.add('hidden');$('activeScreen').classList.remove('hidden');$('bottomBar').classList.remove('hidden');show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}else{$('startScreen').classList.remove('hidden');$('activeScreen').classList.add('hidden');$('timelineView').classList.add('hidden');$('summaryView').classList.add('hidden');$('vehicleView').classList.add('hidden');$('settingsView').classList.add('hidden');$('activityCard').classList.add('hidden');$('detailsCard').classList.add('hidden');$('bottomBar').classList.add('hidden');renderPretripStatus()}greeting();renderHistory()}
+function avatar(){const x=localStorage.getItem(K.avatar);$('avatarBox').innerHTML=x?`<img src="${x}" alt="Driver photo">`:'👤'}function show(view){['activeScreen','timelineView','summaryView','routesView','vehicleView','historyView','settingsView'].forEach(id=>$(id).classList.add('hidden'));if(!day)return;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')$('activeScreen').classList.remove('hidden');if(view==='timeline'){$('timelineView').classList.remove('hidden');renderTimeline()}if(view==='summary'){$('summaryView').classList.remove('hidden');renderSummary()}if(view==='routes'){$('routesView').classList.remove('hidden');renderMyRoutes()}if(view==='vehicle'){$('vehicleView').classList.remove('hidden');renderVehicle()}if(view==='settings')$('settingsView').classList.remove('hidden')}
+function render(){const active=!!day;$('pretripScreen')?.classList.add('hidden');if(active){$('startScreen').classList.add('hidden');$('activeScreen').classList.remove('hidden');$('bottomBar').classList.remove('hidden');show('home');$('driverLine').textContent=day.driver;$('shiftLine').textContent=`${day.vehicle}${day.startingTrailer?' • '+day.startingTrailer:''} • Started ${t12(day.start)}`;avatar();renderCurrent();renderTimeline();renderSummary()}else{$('startScreen').classList.remove('hidden');$('activeScreen').classList.add('hidden');$('timelineView').classList.add('hidden');$('summaryView').classList.add('hidden');$('routesView').classList.add('hidden');$('vehicleView').classList.add('hidden');$('settingsView').classList.add('hidden');$('activityCard').classList.add('hidden');$('detailsCard').classList.add('hidden');$('bottomBar').classList.add('hidden');renderPretripStatus()}greeting();renderHistory()}
 function updateRing(){if(!day)return;const t=totals(day),target=480,circ=2*Math.PI*82,p=Math.min(1,t.shift/target);$('ringFill').style.strokeDasharray=circ;$('ringFill').style.strokeDashoffset=circ*(1-p)}
 
 
+
+let driverDirectory=[];
+async function loadDriverDirectory(){
+  try{
+    const sb=await getCloud();
+    const {data,error}=await sb.from('drivers').select('id,name,active').eq('active',true).order('name');
+    if(error)throw error;
+    driverDirectory=data||[];
+  }catch(e){ console.warn('Driver directory unavailable',e); }
+}
+function currentDriverRecord(){
+  const name=(day?.driver||$('driver').value||'').trim().toLowerCase();
+  return driverDirectory.find(d=>(d.name||'').trim().toLowerCase()===name)||null;
+}
+function localDateOf(iso){
+  if(!iso)return '';
+  const d=new Date(iso), y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${da}`;
+}
+function routeStatusLabel(s){return ({pending:'Pending',assigned:'Assigned',in_progress:'In Progress',completed:'Completed'})[s]||s||'Pending'}
+async function renderMyRoutes(){
+  const host=$('myRoutes'),state=$('routesCloudText');
+  host.innerHTML='';state.textContent='Loading assigned routes…';
+  try{
+    if(!driverDirectory.length)await loadDriverDirectory();
+    const driver=currentDriverRecord();
+    if(!driver){state.textContent=`No Supabase driver record matches ${day?.driver||'this driver'}.`;return}
+    const sb=await getCloud();
+    const {data,error}=await sb.from('dispatch_tasks').select('*').eq('assigned_driver_id',driver.id).order('scheduled_at',{ascending:true,nullsFirst:false});
+    if(error)throw error;
+    const target=day?.date||today();
+    const routes=(data||[]).filter(r=>!r.scheduled_at||localDateOf(r.scheduled_at)===target);
+    state.textContent=routes.length?`${routes.length} route${routes.length===1?'':'s'} assigned for today.`:'No routes assigned for today.';
+    host.innerHTML=routes.map(r=>{
+      const st=(r.status||'pending').toLowerCase().replace(' ','_');
+      const when=r.scheduled_at?new Date(r.scheduled_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'No scheduled time';
+      return `<div class="route-card ${st}"><div class="route-status">${esc(routeStatusLabel(st))}</div><div class="route-title">${esc(r.pickup_name)} → ${esc(r.delivery_name)}</div><div class="route-meta">${esc(when)}${r.job_client?' • '+esc(r.job_client):''}${r.pallet_qty!=null?' • '+esc(r.pallet_qty)+' pallets':''}<br>${esc(r.pickup_address||'')}${r.delivery_address?'<br>→ '+esc(r.delivery_address):''}${r.instructions?'<br><strong>Instructions:</strong> '+esc(r.instructions):''}</div><div class="route-actions">${st!=='in_progress'&&st!=='completed'?`<button class="btn primary" data-start-route="${r.id}">Start Route</button>`:''}${st!=='completed'?`<button class="btn soft" data-complete-route="${r.id}">Complete</button>`:''}</div></div>`;
+    }).join('');
+    host.querySelectorAll('[data-start-route]').forEach(b=>b.onclick=()=>updateDispatchRoute(Number(b.dataset.startRoute),'in_progress'));
+    host.querySelectorAll('[data-complete-route]').forEach(b=>b.onclick=()=>updateDispatchRoute(Number(b.dataset.completeRoute),'completed'));
+  }catch(e){state.textContent='Could not load routes: '+e.message}
+}
+async function updateDispatchRoute(id,status){
+  try{
+    const sb=await getCloud(),payload={status};
+    payload.completed_at=status==='completed'?new Date().toISOString():null;
+    const {error}=await sb.from('dispatch_tasks').update(payload).eq('id',id);
+    if(error)throw error;
+    toast(status==='completed'?'Route completed':'Route started');
+    await renderMyRoutes();
+  }catch(e){toast('Route update failed');console.error(e)}
+}
 function cloudConfigured(){
   return SUPABASE_URL.startsWith('https://') &&
     SUPABASE_PUBLISHABLE_KEY &&
