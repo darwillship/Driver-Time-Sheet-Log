@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f6f8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>Driver Time Sheet Log v1.6.1</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>Driver Time Sheet Log v1.7.0</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--ink:#151922;--muted:#717784;--line:#e3e7ed;--green:#15865b;--green2:#0f6d49;--red:#ca4037;--blue:#2869df;--yellow:#d99a00;--orange:#dd7900;--shadow:0 16px 46px rgba(20,26,36,.08);--r:24px}
@@ -198,7 +198,7 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
   </section>
 </section>
 
-<section id="settingsView" class="hidden"><section class="card"><div class="eyebrow">Personalize</div><h2>Settings</h2><div class="stack"><div class="field"><label>Driver photo</label><input class="control" id="avatarInput" type="file" accept="image/*"></div><div class="field"><label>Appearance</label><select class="control" id="themeSelect"><option value="system">Use phone setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div><button class="btn soft" id="weatherBtn">Enable Local Weather</button><p style="font-size:.8rem">Weather is optional and only requests location when you enable it.</p></div></section></section>
+<section id="settingsView" class="hidden"><section class="card"><div class="eyebrow">Personalize</div><h2>Settings</h2><div class="stack"><div class="field"><label>Driver photo</label><input class="control" id="avatarInput" type="file" accept="image/*"></div><div class="field"><label>Appearance</label><select class="control" id="themeSelect"><option value="system">Use phone setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div><button class="btn soft" id="weatherBtn">Enable Local Weather</button><p style="font-size:.8rem">Weather is optional and only requests location when you enable it.</p></div></section><section class="card"><div class="eyebrow">Office records</div><h2>Cloud Sync</h2><p style="font-size:.85rem">Pre-trips, shifts and activities are saved on this phone first, then sent to the office automatically. If there is no signal they wait here and retry.</p><div class="cloud-state" id="syncState"><span class="status-dot"></span><span id="syncText">Checking…</span></div><div class="actions"><button class="btn soft" id="syncNow">Sync Now</button></div><p style="font-size:.75rem;opacity:.7" id="appVersionLine"></p></section></section>
 <section class="card hidden" id="reportCard"><div id="report"></div><div class="actions no-print"><button class="btn dark" onclick="print()">Print / Save PDF</button><button class="btn soft" id="csvDay">Export CSV</button><button class="btn soft" id="jsonDay">Export JSON</button><button class="btn soft" id="closeReport">Close</button></div></section>
 
 
@@ -268,10 +268,12 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 const $=id=>document.getElementById(id),K={active:'dt-v11-active',history:'dt-v11-history',profile:'dt-v11-profile',recent:'dt-v11-recent',theme:'dt-v11-theme',avatar:'dt-v11-avatar',weather:'dt-v11-weather',pretrip:'dt-v11-pretrip-pending'};
 const SUPABASE_URL='https://hqhfstosclasgwgxubip.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_01rvOlUuiba6260MPA1g4A_5oFgpGCk';
+const APP_VERSION='v1.7.0',OUTBOX='dt-v17-outbox',OUTBOX_FAILED='dt-v17-outbox-failed',DRIVER_CACHE='dt-v17-drivers';
+const uuid=()=>crypto.randomUUID?.()||(Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2));
 let cloud=null,vehicleLoadToken=0;
 const places=[['ALG','1053 N Schmidt Rd, Romeoville, IL 60446'],['ENRU','1000 Windham Pkwy, Bolingbrook, IL 60490'],['Darwill Hillside','11900 Roosevelt Rd, Hillside, IL 60162'],['Darwill McCook','8701 47th St Ste C, McCook, IL 60525'],['South Suburban Post Office','6801 W 73rd St, Bedford Park, IL 60499'],['Fox Valley Post Office','3900 Gabrielle Ln, Aurora, IL 60598'],['Carol Stream Post Office','550 E Fullerton Ave, Carol Stream, IL 60188'],['Worth Post Office','11114 S Harlem Ave, Worth, IL 60482'],['Bolingbrook Post Office','105 Canterbury Ln, Bolingbrook, IL 60440'],['Darwill Oakbrook Tower Terrace','1 Tower Ln, Oakbrook Terrace, IL 60181'],['Envelopes Only','2000 S Park Ave, Streamwood, IL 60107'],['Federal Envelope','608 Country Club Dr, Bensenville, IL 60106'],['Universal Laminating','910 Carlow Dr Ste A, Bolingbrook, IL 60490'],['Platinum Converting','1560 W Stearns Rd, Bartlett, IL 60103'],['Victor Envelope','301 Arthur Ct, Bensenville, IL 60106'],['Supremex Naperville','1500 Shore Rd, Naperville, IL 60563'],['Supremex Chicago','4114 S Peoria St, Chicago, IL 60609']];
 const defs=[['Driving','🚚','Travel between locations'],['Loading','📦','Loading vehicle or trailer'],['Unloading','📥','Unloading at a stop'],['Waiting','⏳','Waiting for access or service'],['Fueling','⛽','Fuel stop'],['Lunch','🍽️','30-minute lunch'],['Drop & Hook','🔁','Hook, drop, or swap trailer'],['Vehicle issue','🔧','Mechanical or vehicle problem'],['Other','•••','Another work activity']],productive=new Set(['Driving','Loading','Unloading','Fueling','Drop & Hook']);let day=null,selected=null,pending='';
-const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),now=()=>new Date().toTimeString().slice(0,5),today=()=>new Date().toISOString().slice(0,10),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),now=()=>new Date().toTimeString().slice(0,5),today=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`},esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mins=t=>{const[a,b]=t.split(':').map(Number);return a*60+b},dur=(a,b)=>{let d=mins(b)-mins(a);return d<0?d+1440:d},fmt=n=>`${Math.floor(n/60)?Math.floor(n/60)+'h ':''}${Math.floor(n%60)}m`,t12=t=>{if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`},icon=t=>defs.find(x=>x[0]===t)?.[1]||'•';
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1700);navigator.vibrate?.(18)}function save(){if(day)write(K.active,day)}function cur(){return day?.activities.find(a=>!a.end)||null}function secs(a){return Math.max(0,Math.floor((Date.now()-new Date(a.startedAt).getTime())/1000))}function clock(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`}
 function totals(d,live=true){const shift=dur(d.start,d.end||(live?now():d.start));let p=0,w=0,l=0,drive=0;for(const a of d.activities){const n=a.end?dur(a.start,a.end):(live?Math.floor(secs(a)/60):0);if(productive.has(a.type))p+=n;if(a.type==='Waiting')w+=n;if(a.type==='Lunch')l+=n;if(a.type==='Driving')drive+=n}return{shift,p,w,l,drive,np:Math.max(0,shift-p),pct:shift?p/shift*100:0}}
@@ -290,20 +292,31 @@ async function loadDriverDirectory(){
     if(error)throw error;
     const excluded=new Set(['sergi','washington','quick delivery']);
     driverDirectory=(data||[]).filter(d=>!excluded.has((d.name||'').trim().toLowerCase()));
-    const sel=$('driver');
-    const previous=sel.value;
-    sel.innerHTML='<option value="">Select driver…</option>'+driverDirectory.map(d=>`<option value="${esc(d.name)}" data-driver-id="${d.id}">${esc(d.name)}</option>`).join('');
-    if(previous&&driverDirectory.some(d=>d.name===previous))sel.value=previous;
+    write(DRIVER_CACHE,driverDirectory);
   }catch(e){
     console.warn('Driver directory unavailable',e);
-    const sel=$('driver');
-    if(sel)sel.innerHTML='<option value="">Unable to load drivers</option>';
-    toast('Could not load driver list');
+    driverDirectory=read(DRIVER_CACHE,[]);
+    if(!driverDirectory.length){const sel=$('driver');if(sel)sel.innerHTML='<option value="">Unable to load drivers</option>';toast('Could not load driver list');return}
   }
+  fillDriverSelect();
+}
+function fillDriverSelect(){
+  const sel=$('driver');if(!sel)return;
+  const previous=sel.value||read(K.profile,{}).driver||'';
+  sel.innerHTML='<option value="">Select driver…</option>'+driverDirectory.map(d=>`<option value="${esc(d.name)}" data-driver-id="${d.id}">${esc(d.name)}</option>`).join('');
+  if(previous&&driverDirectory.some(d=>d.name===previous))sel.value=previous;
+  renderPretripStatus();greeting();
+}
+function selectedDriverId(){const o=$('driver')?.selectedOptions?.[0];const id=Number(o?.dataset?.driverId);return Number.isFinite(id)&&id>0?id:null}
+/* v1.7.0: match by Supabase driver id; fall back to name only for shifts started before v1.7.0 */
+function driverRecordFor(id,name){
+  if(id){const byId=driverDirectory.find(d=>Number(d.id)===Number(id));if(byId)return byId;return{id:Number(id),name:name||''}}
+  const n=(name||'').trim().toLowerCase();if(!n)return null;
+  return driverDirectory.find(d=>(d.name||'').trim().toLowerCase()===n)||null;
 }
 function currentDriverRecord(){
-  const name=(day?.driver||$('driver').value||'').trim().toLowerCase();
-  return driverDirectory.find(d=>(d.name||'').trim().toLowerCase()===name)||null;
+  if(day)return driverRecordFor(day.driverId,day.driver);
+  return driverRecordFor(selectedDriverId(),$('driver').value);
 }
 function localDateOf(iso){
   if(!iso)return '';
@@ -322,7 +335,7 @@ async function renderMyRoutes(){
     const {data,error}=await sb.from('dispatch_tasks').select('*').eq('assigned_driver_id',driver.id).order('scheduled_at',{ascending:true,nullsFirst:false});
     if(error)throw error;
     const target=day?.date||today();
-    const routes=(data||[]).filter(r=>!r.scheduled_at||localDateOf(r.scheduled_at)===target);
+    const routes=(data||[]).filter(r=>(r.work_date?String(r.work_date).slice(0,10):(r.scheduled_at?localDateOf(r.scheduled_at):today()))===target);
     const active=routes.find(r=>(r.status||'').toLowerCase().replace(' ','_')==='in_progress')||null;
     const open=routes.filter(r=>!['completed','in_progress'].includes((r.status||'pending').toLowerCase().replace(' ','_')));
     const completed=routes.filter(r=>(r.status||'').toLowerCase()==='completed');
@@ -344,8 +357,10 @@ async function renderMyRoutes(){
     if(open.length){html+=`<div class="queued-label">${active?'Next assigned routes':'Assigned routes'}</div>`+open.map(r=>routeCard(r,false)).join('');}
     if(!active&&!open.length)html='<div class="route-empty">All assigned routes are complete for today.</div>';
     if(completed.length)html+=`<div class="queued-label">Completed today (${completed.length})</div>`+completed.map(r=>routeCard(r,false)).join('');
+    if(!active)html+=`<div class="actions" style="margin-top:12px"><button class="btn danger" data-end-shift-routes>End Shift</button></div>`;
     host.innerHTML=html;
-    $('activityStatusCard')?.classList.toggle('hidden',!active);
+    host.querySelector('[data-end-shift-routes]')?.addEventListener('click',openEnd);
+    $('activityStatusCard')?.classList.toggle('hidden',!(active||cur()));
     host.querySelectorAll('[data-start-route]').forEach(b=>b.onclick=()=>startDispatchRoute(Number(b.dataset.startRoute),routes));
     host.querySelectorAll('[data-complete-route]').forEach(b=>b.onclick=()=>completeDispatchRoute(Number(b.dataset.completeRoute)));
     host.querySelectorAll('[data-route-act]').forEach(b=>b.onclick=()=>startRouteSupport(b.dataset.routeAct,Number(b.dataset.routeId),routes));
@@ -514,7 +529,7 @@ function showNextActions(location,lastType=''){
 }
 function renderCurrent(){
   if(!day)return;
-  $('activityStatusCard')?.classList.toggle('hidden',!day.activeDispatchRouteId);
+  $('activityStatusCard')?.classList.toggle('hidden',!(day.activeDispatchRouteId||cur()));
   const c=cur(),t=totals(day);
   $('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();
   if(c){
@@ -590,47 +605,101 @@ function confirmActivity(){
   if(type==='Drop & Hook'){meta.trailerAction=$('trailerAction').value;meta.trailer=$('trailerChoice').value}
   startActivity(type,location,address,notes,meta);hideActivityPanels();toast(`${type} started`);
 }
-async function syncCurrentActivityToDispatch(activity){
-  try{
-    if(!driverDirectory.length)await loadDriverDirectory();
-    const driver=currentDriverRecord(); if(!driver)throw new Error('Driver record not found');
-    const sb=await getCloud();
-    const payload={
-      driver_id:driver.id,
-      driver_name:driver.name,
-      activity_type:activity.type,
-      activity_location:activity.location||null,
-      activity_notes:activity.notes||null,
-      dispatch_task_id:day?.activeDispatchRouteId||null,
-      started_at:activity.startedAt||new Date().toISOString(),
-      updated_at:new Date().toISOString(),
-      active:true
-    };
-    const {error}=await sb.from('driver_live_status').upsert(payload,{onConflict:'driver_id'});
-    if(error)throw error;
-  }catch(e){console.error('Live activity sync failed',e);toast('Dashboard sync failed')}
+/* v1.7.0: live status for the dispatch dashboard. One serialized sender that always pushes the latest state; quiet retry. */
+let liveWanted=null,liveSending=false,liveRetry=null;
+function liveRow(activity){
+  const driver=currentDriverRecord();if(!driver)return null;
+  if(!activity)return{driver_id:driver.id,driver_name:driver.name||day?.driver||'',activity_type:null,activity_location:null,activity_notes:null,dispatch_task_id:day?.activeDispatchRouteId||null,started_at:null,updated_at:new Date().toISOString(),active:false};
+  const note=[activity.reason,activity.trailerAction&&`${activity.trailerAction}${activity.trailer?' '+activity.trailer:''}`,activity.notes].filter(Boolean).join(' – ');
+  return{driver_id:driver.id,driver_name:driver.name||day?.driver||'',activity_type:activity.type,activity_location:activity.location||null,activity_notes:note||null,dispatch_task_id:activity.dispatchRouteId||day?.activeDispatchRouteId||null,started_at:activity.startedAt||new Date().toISOString(),updated_at:new Date().toISOString(),active:true};
 }
-async function closeLiveDispatchActivity(){
-  try{
-    if(!driverDirectory.length)await loadDriverDirectory();
-    const driver=currentDriverRecord(); if(!driver)return;
-    const sb=await getCloud();
-    const {error}=await sb.from('driver_live_status').upsert({
-      driver_id:driver.id,driver_name:driver.name,activity_type:null,activity_location:null,
-      activity_notes:null,dispatch_task_id:day?.activeDispatchRouteId||null,
-      started_at:null,updated_at:new Date().toISOString(),active:false
-    },{onConflict:'driver_id'});
-    if(error)throw error;
-  }catch(e){console.warn('Could not clear dashboard activity',e)}
+function pushLive(row){if(!row)return;liveWanted=row;sendLive()}
+async function sendLive(){
+  if(liveSending||!liveWanted)return;liveSending=true;clearTimeout(liveRetry);
+  const row=liveWanted;
+  try{const sb=await getCloud();const {error}=await sb.from('driver_live_status').upsert(row,{onConflict:'driver_id'});if(error)throw error;if(liveWanted===row)liveWanted=null}
+  catch(e){console.warn('Live status sync will retry',e?.message||e);liveRetry=setTimeout(sendLive,30000)}
+  finally{liveSending=false;if(liveWanted&&liveWanted!==row)sendLive()}
 }
+async function syncCurrentActivityToDispatch(activity){if(!driverDirectory.length)await loadDriverDirectory();pushLive(liveRow(activity))}
+async function closeLiveDispatchActivity(){if(!driverDirectory.length)await loadDriverDirectory();pushLive(liveRow(null))}
+
+/* v1.7.0: durable cloud records (driver_pretrips / driver_shifts / driver_activities).
+   Everything is written to this phone first; an outbox in localStorage sends rows in order and retries when offline. */
+function enqueue(table,row,opts){const q=read(OUTBOX,[]);q.push({qid:uuid(),table,row,opts,tries:0,queuedAt:new Date().toISOString()});write(OUTBOX,q);flushSoon()}
+let flushing=false,flushTimer=null;
+function flushSoon(ms=400){clearTimeout(flushTimer);flushTimer=setTimeout(flushOutbox,ms)}
+function isNetworkError(e){const c=String(e?.code||''),m=String(e?.message||e||'');return !c||/^PGRST0/.test(c)||/^5\d\d$/.test(c)||/fetch|network|load failed|timeout/i.test(m)}
+async function flushOutbox(){
+  if(flushing)return;flushing=true;
+  try{
+    if(navigator.onLine===false){flushSoon(30000);return}
+    let sb;try{sb=await getCloud()}catch(e){flushSoon(30000);return}
+    for(;;){
+      const q=read(OUTBOX,[]);if(!q.length)break;
+      const item=q[0];
+      if(item.row&&'driver_id'in item.row&&!item.row.driver_id){
+        if(!driverDirectory.length)await loadDriverDirectory();
+        const d=driverRecordFor(null,item.row.driver_name||item.row._driver_name);if(d)item.row.driver_id=d.id;
+      }
+      let error=null;
+      const sendRow=Object.fromEntries(Object.entries(item.row||{}).filter(([k])=>!k.startsWith('_')));
+      try{({error}=await sb.from(item.table).upsert(sendRow,item.opts))}catch(e){error={message:String(e?.message||e)}}
+      const cur=read(OUTBOX,[]),i=cur.findIndex(x=>x.qid===item.qid);
+      if(!error){if(i>-1){cur.splice(i,1);write(OUTBOX,cur)}continue}
+      console.warn('Cloud sync will retry',item.table,error);
+      if(isNetworkError(error)){flushSoon(30000);break}
+      item.tries=(item.tries||0)+1;item.lastError=error.message||String(error);
+      if(item.tries>=8){if(i>-1)cur.splice(i,1);write(OUTBOX,cur);const f=read(OUTBOX_FAILED,[]);f.push({...item,failedAt:new Date().toISOString()});write(OUTBOX_FAILED,f);continue}
+      if(i>-1)cur[i]=item;write(OUTBOX,cur);flushSoon(30000);break;
+    }
+  }finally{flushing=false;renderSyncStatus()}
+}
+function renderSyncStatus(){
+  const t=$('syncText'),dot=$('syncState')?.querySelector('.status-dot');if(!t)return;
+  const n=read(OUTBOX,[]).length,f=read(OUTBOX_FAILED,[]).length;
+  t.textContent=n?`${n} record${n===1?'':'s'} waiting to send — will retry automatically.`:'All records sent to the office.';
+  if(f)t.textContent+=` ${f} record${f===1?'':'s'} could not be accepted and ${f===1?'is':'are'} kept on this phone.`;
+  if(dot)dot.className='status-dot '+(f?'bad':n?'':'ok');
+  const v=$('appVersionLine');if(v)v.textContent=`Driver Time Sheet ${APP_VERSION}`;
+}
+function localIso(date,hhmm){const d=new Date(`${date}T${hhmm||'00:00'}:00`);return isNaN(d)?new Date().toISOString():d.toISOString()}
+function shiftRow(d,extra={}){
+  const drv=driverRecordFor(d.driverId,d.driver);
+  return{device_shift_id:d.id,driver_id:drv?.id||null,driver_name:d.driver,work_date:d.date,vehicle:d.vehicle||null,trailer:d.startingTrailer||null,
+    shift_start:localIso(d.date,d.start),started_at_device:d.startedAt||null,pretrip_device_id:d.pretrip?.deviceId||null,app_version:APP_VERSION,status:'open',...extra};
+}
+function queueShiftStart(d){if(!d||d.cloudShiftQueued)return;if(d.pretrip&&!d.pretrip.deviceId){d.pretrip.deviceId=uuid();d.pretrip.driverId=d.driverId||null;d.pretrip.trailer=d.pretrip.trailer||d.startingTrailer||'';queuePretrip(d.pretrip)}enqueue('driver_shifts',shiftRow(d),{onConflict:'device_shift_id'});d.cloudShiftQueued=true;if(d===day)save()}
+function queueShiftEnd(d){
+  const t=d.totals||totals(d,false),startIso=localIso(d.date,d.start),endIso=new Date(new Date(startIso).getTime()+t.shift*60000).toISOString();
+  enqueue('driver_shifts',shiftRow(d,{status:'completed',shift_end:endIso,ended_at_device:d.endAt||null,shift_minutes:t.shift,driving_minutes:t.drive,productive_minutes:t.p,waiting_minutes:t.w,lunch_minutes:t.l,nonproductive_minutes:t.np,productivity_pct:Math.round(t.pct*10)/10,activity_count:d.activities.length}),{onConflict:'device_shift_id'});
+}
+function queueShiftDiscard(d){if(!d||!d.cloudShiftQueued)return;enqueue('driver_shifts',shiftRow(d,{status:'discarded',ended_at_device:new Date().toISOString(),activity_count:d.activities.length}),{onConflict:'device_shift_id'})}
+function queueActivity(a){
+  if(!day||!a||a.cloudQueued)return;queueShiftStart(day);
+  const drv=driverRecordFor(day.driverId,day.driver);
+  const detail={};['origin','destination','trailerAction','trailer','resumeRoute','resumedAfterFuel','contextLocation'].forEach(k=>{if(a[k])detail[k]=a[k]});
+  enqueue('driver_activities',{device_activity_id:a.id,device_shift_id:day.id,driver_id:drv?.id||null,_driver_name:day.driver,activity_type:a.type,started_at:a.startedAt,ended_at:a.endAt||null,
+    minutes:a.end?dur(a.start,a.end):null,location:a.location||null,address:a.address||null,notes:a.notes||null,reason:a.reason||null,detail:Object.keys(detail).length?detail:null,dispatch_task_id:a.dispatchRouteId||null},
+    {onConflict:'device_activity_id',ignoreDuplicates:true});
+  a.cloudQueued=true;
+}
+function pretripRow(p){
+  const drv=driverRecordFor(p.driverId,p.driver);
+  const checklist=Object.entries(PRETRIP_ITEMS).flatMap(([group,items])=>items.map(item=>({group,item,result:(p.items||{})[item]||null})));
+  return{device_pretrip_id:p.deviceId,driver_id:drv?.id||null,driver_name:p.driver,work_date:p.date,vehicle:p.vehicle,trailer:p.trailer||null,odometer:String(p.odometer||''),condition:p.condition,
+    checklist,defects:checklist.filter(x=>x.result==='attention').map(x=>x.item),comments:p.comments||null,signature_name:p.signature,submitted_at:p.completedAt,app_version:APP_VERSION};
+}
+function queuePretrip(p){if(!p?.deviceId)return;enqueue('driver_pretrips',pretripRow(p),{onConflict:'device_pretrip_id',ignoreDuplicates:true})}
 function startActivity(type,location='',address='',notes='',meta={}){
-  if(cur())endCurrent(false);
-  const activity={id:crypto.randomUUID?.()||Date.now()+'',type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta};
+  if(cur())endCurrent(false,true);
+  const activity={id:uuid(),type,start:now(),startedAt:new Date().toISOString(),end:'',endAt:'',location,address,notes,...meta};
+  if(!activity.dispatchRouteId&&day.activeDispatchRouteId)activity.dispatchRouteId=day.activeDispatchRouteId;
   day.activities.push(activity);
   save();renderCurrent();renderTimeline();syncCurrentActivityToDispatch(activity);
 }
-function endCurrent(r=true){
-  const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();save();closeLiveDispatchActivity();if(r){renderCurrent();renderTimeline();renderSummary()}}
+function endCurrent(r=true,replacing=false){
+  const c=cur();if(c){c.end=now();c.endAt=new Date().toISOString();queueActivity(c);save();if(!replacing)closeLiveDispatchActivity();if(r){renderCurrent();renderTimeline();renderSummary()}}
 }
 function arriveFromDriving(){
   const c=cur();if(!c||c.type!=='Driving')return;
@@ -668,8 +737,8 @@ function finishGuided(activity){
 }
 function renderTimeline(){if(!day)return;const l=[...day.activities].reverse();$('timeline').innerHTML=l.length?l.map(a=>`<div class="event"><div class="event-time">${t12(a.start)}</div><div class="event-body ${!a.end?'active':''}"><div class="event-title"><span>${icon(a.type)} ${esc(a.type)}</span><span class="badge">${a.end?fmt(dur(a.start,a.end)):fmt(Math.floor(secs(a)/60))}</span></div>${a.location?`<div class="event-meta">${esc(a.location)}</div>`:''}${a.address?`<div class="event-meta">${esc(a.address)}</div>`:''}${a.reason?`<div class="event-meta">Reason: ${esc(a.reason)}</div>`:''}${a.notes?`<div class="event-meta">${esc(a.notes)}</div>`:''}</div></div>`).join(''):'<p>No activities recorded yet.</p>'}
 function renderSummary(){if(!day)return;const t=totals(day);$('productivityBar').style.width=Math.min(100,t.pct)+'%';$('summaryText').textContent=`${t.pct.toFixed(0)}% productive so far`;$('liveSummary').innerHTML=`<div class="sum"><span>SHIFT</span><b>${fmt(t.shift)}</b></div><div class="sum"><span>DRIVING</span><b>${fmt(t.drive)}</b></div><div class="sum"><span>PRODUCTIVE</span><b>${fmt(t.p)}</b></div><div class="sum"><span>WAITING</span><b>${fmt(t.w)}</b></div><div class="sum"><span>LUNCH</span><b>${fmt(t.l)}</b></div><div class="sum"><span>NONPRODUCTIVE</span><b>${fmt(t.np)}</b></div>`}
-function startDay(){const driver=$('driver').value.trim(),vehicle=$('vehicle').value,date=$('date').value,start=$('startTime').value,startingTrailer=vehicle==='Semi-Truck'?$('startingTrailer').value:'';if(!driver||!vehicle||!date||!start)return toast('Complete all shift fields');if(!pretripValid()){openPretrip(false);return}const pretrip=currentPretrip();day={id:crypto.randomUUID?.()||Date.now()+'',driver,vehicle,startingTrailer,date,start,startedAt:new Date().toISOString(),end:'',endAt:'',pretrip,currentLocation:'',resumeRoute:null,activities:[]};localStorage.removeItem(K.pretrip);write(K.profile,{driver,vehicle,startingTrailer});save();render();window.scrollTo({top:0,behavior:'smooth'});toast('Shift started')}
-function openEnd(){$('endTime').value=now();$('endError').classList.add('hidden');$('endDialog').showModal()}function finishDay(){if(cur())endCurrent(false);const end=$('endTime').value;if(!end||dur(day.start,end)<=0){$('endError').textContent='End time must be after start time.';$('endError').classList.remove('hidden');return}day.end=end;day.endAt=new Date().toISOString();day.completedAt=new Date().toISOString();day.totals=totals(day,false);const h=read(K.history,[]);h.unshift(day);write(K.history,h);selected=day;localStorage.removeItem(K.active);day=null;$('endDialog').close();render();showReport(selected,true)}
+function startDay(){const driver=$('driver').value.trim(),vehicle=$('vehicle').value,date=$('date').value,start=$('startTime').value,startingTrailer=vehicle==='Semi-Truck'?$('startingTrailer').value:'';if(!driver||!vehicle||!date||!start)return toast('Complete all shift fields');if(!pretripValid()){openPretrip(false);return}const pretrip=currentPretrip();const driverId=selectedDriverId()||driverRecordFor(null,driver)?.id||null;if(pretrip&&!pretrip.deviceId){pretrip.deviceId=uuid();pretrip.driverId=driverId;pretrip.trailer=pretrip.trailer||startingTrailer;queuePretrip(pretrip)}day={id:uuid(),driver,driverId,vehicle,startingTrailer,date,start,startedAt:new Date().toISOString(),end:'',endAt:'',pretrip,currentLocation:'',resumeRoute:null,activities:[]};queueShiftStart(day);localStorage.removeItem(K.pretrip);write(K.profile,{driver,vehicle,startingTrailer});save();render();window.scrollTo({top:0,behavior:'smooth'});toast('Shift started')}
+function openEnd(){$('endTime').value=now();$('endError').classList.add('hidden');$('endDialog').showModal()}function finishDay(){if(cur())endCurrent(false);const end=$('endTime').value;if(!end||dur(day.start,end)<=0){$('endError').textContent='End time must be after start time.';$('endError').classList.remove('hidden');return}day.end=end;day.endAt=new Date().toISOString();day.completedAt=new Date().toISOString();day.totals=totals(day,false);queueShiftEnd(day);closeLiveDispatchActivity();const h=read(K.history,[]);h.unshift(day);write(K.history,h);selected=day;localStorage.removeItem(K.active);day=null;$('endDialog').close();render();showReport(selected,true)}
 function showReport(d,celebrate=false){
   selected=d;
   const t=d.totals||totals(d,false);
@@ -783,9 +852,14 @@ function savePretrip(){
     driver:$('driver').value.trim(),
     vehicle:$('vehicle').value,
     date:$('date').value,
+    driverId:selectedDriverId(),
+    trailer:$('vehicle').value==='Semi-Truck'?($('startingTrailer').value||''):'',
+    deviceId:uuid(),
+    appVersion:APP_VERSION,
     completedAt:new Date().toISOString()
   };
   write(K.pretrip,rec);
+  queuePretrip(rec);
   $('pretripMessage').innerHTML=`<div class="pretrip-success">✓ Pre-trip completed successfully.</div>`;
   toast('Pre-trip completed');
   setTimeout(()=>{
@@ -806,6 +880,6 @@ function pretripReport(p){
 
 function renderHistory(){const h=read(K.history,[]);$('history').innerHTML=h.length?h.map(d=>`<div class="event-body" style="margin-bottom:9px"><div class="event-title"><span>${esc(d.driver)}</span><span class="badge">${esc(d.date)}</span></div><div class="event-meta">${esc(d.vehicle)} • ${fmt((d.totals||totals(d,false)).shift)}</div><div class="actions"><button class="btn soft" data-view-report="${d.id}">View Report</button></div></div>`).join(''):'<p>No completed shifts yet.</p>';document.querySelectorAll('[data-view-report]').forEach(b=>b.onclick=()=>showReport(h.find(x=>x.id===b.dataset.viewReport)))}
 async function weather(){if(!navigator.geolocation)return toast('Location not supported');navigator.geolocation.getCurrentPosition(async p=>{try{const u=`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit`;const j=await fetch(u).then(r=>r.json()),temp=Math.round(j.current.temperature_2m);write(K.weather,{temp,at:Date.now()});showWeather();toast('Weather enabled')}catch{toast('Weather unavailable')}},()=>toast('Location permission was not granted'),{enableHighAccuracy:false,timeout:8000})}function showWeather(){const w=read(K.weather,null);if(w&&Date.now()-w.at<6*3600000){$('weatherChip').textContent=`☀️ ${w.temp}°F`;$('weatherChip').classList.remove('hidden')}}
-function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('pretripBtn').onclick=()=>openPretrip(false);$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('cancelPretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>hideActivityPanels();document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){localStorage.removeItem(K.active);location.reload()}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c){if(c.type==='Lunch'){const r=Math.max(0,1800-secs(c));$('timer').textContent=r?clock(r):'30:00+';$('startedLine').textContent=r?`Lunch ends in ${clock(r)} • Started ${t12(c.start)}`:`30 minutes reached • Started ${t12(c.start)}`}else $('timer').textContent=clock(secs(c))}if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+function init(){const p=read(K.profile,{});$('driver').value=p.driver||'';$('vehicle').value=p.vehicle||'';$('startingTrailer').value=p.startingTrailer||'';$('date').value=today();$('startTime').value=now();$('headerDate').textContent=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric'}).format(new Date());const th=localStorage.getItem(K.theme)||'system';$('themeSelect').value=th;if(th!=='system')document.documentElement.dataset.theme=th;$('themeSelect').onchange=e=>{const v=e.target.value;localStorage.setItem(K.theme,v);if(v==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v};const toggle=()=>$('trailerWrap').classList.toggle('hidden',$('vehicle').value!=='Semi-Truck');$('vehicle').onchange=toggle;toggle();$('driver').oninput=()=>{greeting();renderPretripStatus()};$('date').onchange=renderPretripStatus;const oldVehicleChange=$('vehicle').onchange;$('vehicle').onchange=()=>{oldVehicleChange?.();renderPretripStatus()};$('pretripBtn').onclick=()=>openPretrip(false);$('startBtn').onclick=startDay;$('closePretrip').onclick=closePretrip;$('cancelPretrip').onclick=closePretrip;$('markAllOk').onclick=()=>{Object.values(PRETRIP_ITEMS).flat().forEach(n=>pretripDraft.items[n]='ok');buildPretripList(false)};$('clearPretrip').onclick=()=>{pretripDraft.items={};buildPretripList(false)};$('completePretrip').onclick=savePretrip;renderPretripStatus();$('cancelActivity').onclick=()=>hideActivityPanels();document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));$('confirmEnd').onclick=finishDay;$('cancelEnd').onclick=()=>$('endDialog').close();$('avatarInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{localStorage.setItem(K.avatar,r.result);avatar();toast('Photo saved')};r.readAsDataURL(f)};$('weatherBtn').onclick=weather;$('closeReport').onclick=()=>{$('reportCard').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'})};$('csvDay').onclick=()=>selected&&csv([selected],`${selected.driver}-${selected.date}.csv`);$('jsonDay').onclick=()=>selected&&json([selected],`${selected.driver}-${selected.date}.json`);$('csvAll').onclick=()=>csv(read(K.history,[]),'driver-timesheet-history.csv');$('jsonAll').onclick=()=>json(read(K.history,[]),'driver-timesheet-history.json');const a=read(K.active,null);if(a){$('resumeCard').classList.remove('hidden');$('startScreen').classList.add('hidden');$('resumeText').textContent=`${a.driver} has an unfinished shift from ${a.date}.`;$('resumeBtn').onclick=()=>{day=a;$('resumeCard').classList.add('hidden');queueShiftStart(day);render()};$('discardBtn').onclick=()=>{if(confirm('Discard this unfinished shift?')){day=a;queueShiftDiscard(a);closeLiveDispatchActivity();day=null;localStorage.removeItem(K.active);setTimeout(()=>location.reload(),1200)}}}showWeather();renderHistory();greeting();setInterval(()=>{if(!day)return;const c=cur(),t=totals(day);$('shiftMetric').textContent=fmt(t.shift);$('productiveMetric').textContent=fmt(t.p);$('waitingMetric').textContent=fmt(t.w);updateRing();if(c){if(c.type==='Lunch'){const r=Math.max(0,1800-secs(c));$('timer').textContent=r?clock(r):'30:00+';$('startedLine').textContent=r?`Lunch ends in ${clock(r)} • Started ${t12(c.start)}`:`30 minutes reached • Started ${t12(c.start)}`}else $('timer').textContent=clock(secs(c))}if(!$('summaryView').classList.contains('hidden'))renderSummary()},1000);if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));$('syncNow').onclick=()=>{flushOutbox();if(liveWanted)sendLive();toast('Syncing…')};addEventListener('online',()=>{flushSoon(500);sendLive()});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')flushSoon(800)});setInterval(()=>{if(read(OUTBOX,[]).length)flushOutbox()},60000);renderSyncStatus();flushSoon(1500)}
 init();loadDriverDirectory();})();
 </script></body></html>
