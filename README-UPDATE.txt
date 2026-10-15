@@ -1,3 +1,12 @@
+Driver Time Sheet v1.8.0 (2026-10-15)
+- Truck list now comes from the dispatch dashboard (same trucks and names: McCook Van, Hillside Van, Sterling,
+  Big Blue, Frey, Big Gray, White Panel Truck). Trucks marked Out of Service / At Repair Shop on the dashboard
+  are shown greyed out and cannot be picked. "Semi-Truck (with trailer)" stays under Other.
+- The pre-trip and the shift now also save the truck's dashboard id (vehicle_id), so the submitted pre-trip
+  decides which truck the dashboard shows for that driver today.
+- Pre-trip flow, locking (records cannot be edited/deleted) and the offline outbox are unchanged.
+- Service worker cache bumped to driver-timesheet-v1.8.0 so installed phones pick up the update.
+
 Driver Time Sheet v1.7.0 (2026-10-07)
 - Pre-trip inspections are now stored centrally in Supabase (driver_pretrips) the moment the driver taps
   Complete Pre-Trip. Records are insert-only: they cannot be edited or deleted from the apps (DOT retention).
