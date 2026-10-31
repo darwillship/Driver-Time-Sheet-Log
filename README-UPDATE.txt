@@ -1,3 +1,13 @@
+Driver Time Sheet v1.9.0 (2026-10-31)
+- Cloud reads/writes now go through narrow Supabase functions (driver_app_drivers, driver_app_vehicles,
+  driver_app_vehicle_docs, driver_app_tasks, driver_app_set_status, driver_app_live, driver_app_submit) so the
+  tables can later be closed to the public key. If a function is unavailable, the app falls back to the old
+  direct calls (reads on any error; writes only if the function does not exist, so nothing is sent twice).
+- Route Start/Complete now also checks the route is still assigned to this driver.
+- Pre-trips stay insert-only (existing pre-trips are never updated); outbox keys unchanged, so queued
+  offline records from v1.8.0 still send.
+- Service worker cache bumped to driver-timesheet-v1.9.0.
+
 Driver Time Sheet v1.8.0 (2026-10-15)
 - Truck list now comes from the dispatch dashboard (same trucks and names: McCook Van, Hillside Van, Sterling,
   Big Blue, Frey, Big Gray, White Panel Truck). Trucks marked Out of Service / At Repair Shop on the dashboard

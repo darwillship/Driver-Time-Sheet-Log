@@ -268,7 +268,7 @@ main{max-width:780px;margin:auto;padding:18px 14px calc(102px + env(safe-area-in
 const $=id=>document.getElementById(id),K={active:'dt-v11-active',history:'dt-v11-history',profile:'dt-v11-profile',recent:'dt-v11-recent',theme:'dt-v11-theme',avatar:'dt-v11-avatar',weather:'dt-v11-weather',pretrip:'dt-v11-pretrip-pending'};
 const SUPABASE_URL='https://hqhfstosclasgwgxubip.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_01rvOlUuiba6260MPA1g4A_5oFgpGCk';
-const APP_VERSION='v1.8.0',OUTBOX='dt-v17-outbox',OUTBOX_FAILED='dt-v17-outbox-failed',DRIVER_CACHE='dt-v17-drivers';
+const APP_VERSION='v1.9.0',OUTBOX='dt-v17-outbox',OUTBOX_FAILED='dt-v17-outbox-failed',DRIVER_CACHE='dt-v17-drivers';
 const uuid=()=>crypto.randomUUID?.()||(Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2));
 let cloud=null,vehicleLoadToken=0;
 const places=[['ALG','1053 N Schmidt Rd, Romeoville, IL 60446'],['ENRU','1000 Windham Pkwy, Bolingbrook, IL 60490'],['Darwill Hillside','11900 Roosevelt Rd, Hillside, IL 60162'],['Darwill McCook','8701 47th St Ste C, McCook, IL 60525'],['South Suburban Post Office','6801 W 73rd St, Bedford Park, IL 60499'],['Fox Valley Post Office','3900 Gabrielle Ln, Aurora, IL 60598'],['Carol Stream Post Office','550 E Fullerton Ave, Carol Stream, IL 60188'],['Worth Post Office','11114 S Harlem Ave, Worth, IL 60482'],['Bolingbrook Post Office','105 Canterbury Ln, Bolingbrook, IL 60440'],['Darwill Oakbrook Tower Terrace','1 Tower Ln, Oakbrook Terrace, IL 60181'],['Envelopes Only','2000 S Park Ave, Streamwood, IL 60107'],['Federal Envelope','608 Country Club Dr, Bensenville, IL 60106'],['Universal Laminating','910 Carlow Dr Ste A, Bolingbrook, IL 60490'],['Platinum Converting','1560 W Stearns Rd, Bartlett, IL 60103'],['Victor Envelope','301 Arthur Ct, Bensenville, IL 60106'],['Supremex Naperville','1500 Shore Rd, Naperville, IL 60563'],['Supremex Chicago','4114 S Peoria St, Chicago, IL 60609']];
@@ -288,7 +288,8 @@ let driverDirectory=[];
 async function loadDriverDirectory(){
   try{
     const sb=await getCloud();
-    const {data,error}=await sb.from('drivers').select('id,name,active').eq('active',true).order('name');
+    const {data:all,error}=await rpcRead(sb,'driver_app_drivers',{},()=>sb.from('drivers').select('id,name,active').eq('active',true).order('name'));
+    const data=(all||[]).filter(d=>d.active!==false);
     if(error)throw error;
     const excluded=new Set(['sergi','washington','quick delivery']);
     driverDirectory=(data||[]).filter(d=>!excluded.has((d.name||'').trim().toLowerCase()));
@@ -307,7 +308,9 @@ let truckDirectory=[];
 async function loadTruckDirectory(){
   try{
     const sb=await getCloud();
-    const [v,st]=await Promise.all([sb.from('vehicles').select('id,name,active').order('id'),sb.from('vehicle_status').select('vehicle_id,status,note')]);
+    let v,st;try{v=await sb.rpc('driver_app_vehicles',{})}catch(e){v={error:e}}
+    if(!v.error){st={data:(v.data||[]).map(x=>({vehicle_id:x.id,status:x.status,note:x.note}))};v={data:(v.data||[]).map(x=>({id:x.id,name:x.name,active:x.active})).sort((a,b)=>Number(a.id)-Number(b.id))}}
+    else{console.warn('RPC driver_app_vehicles failed; using direct query:',v.error?.message);[v,st]=await Promise.all([sb.from('vehicles').select('id,name,active').order('id'),sb.from('vehicle_status').select('vehicle_id,status,note')])}
     if(v.error)throw v.error;
     const svc=new Map(((st&&!st.error&&st.data)||[]).map(x=>[Number(x.vehicle_id),x]));
     truckDirectory=(v.data||[]).filter(x=>x.active!==false).map(x=>({id:Number(x.id),name:x.name,status:svc.get(Number(x.id))?.status||'in_service',note:svc.get(Number(x.id))?.note||''}));
@@ -357,7 +360,8 @@ async function renderMyRoutes(){
     const driver=currentDriverRecord();
     if(!driver){state.textContent=`No Supabase driver record matches ${day?.driver||'this driver'}.`;return}
     const sb=await getCloud();
-    const {data,error}=await sb.from('dispatch_tasks').select('*').eq('assigned_driver_id',driver.id).order('scheduled_at',{ascending:true,nullsFirst:false});
+    const {data:raw,error}=await rpcRead(sb,'driver_app_tasks',{p_driver_id:Number(driver.id)},()=>sb.from('dispatch_tasks').select('*').eq('assigned_driver_id',driver.id).order('scheduled_at',{ascending:true,nullsFirst:false}));
+    const data=(raw||[]).slice().sort((a,b)=>(a.scheduled_at?Date.parse(a.scheduled_at):Infinity)-(b.scheduled_at?Date.parse(b.scheduled_at):Infinity));
     if(error)throw error;
     const target=day?.date||today();
     const routes=(data||[]).filter(r=>(r.work_date?String(r.work_date).slice(0,10):(r.scheduled_at?localDateOf(r.scheduled_at):today()))===target);
@@ -396,7 +400,7 @@ async function startDispatchRoute(id,routes=[]){
   try{
     const r=routes.find(x=>Number(x.id)===Number(id)); if(!r)return;
     const sb=await getCloud();
-    const {error}=await sb.from('dispatch_tasks').update({status:'in_progress',completed_at:null}).eq('id',id);if(error)throw error;
+    const {error}=await setRouteStatus(sb,id,'in_progress',null);if(error)throw error;
     day.activeDispatchRouteId=id;day.currentLocation=r.pickup_name||day.currentLocation||'';save();
     startActivity('Driving',`${r.pickup_name||'Pickup'} → ${r.delivery_name||'Destination'}`,[r.pickup_address,r.delivery_address].filter(Boolean).join(' → '),'',{origin:r.pickup_name||'',destination:r.delivery_name||'',dispatchRouteId:id});
     toast(`Route started • Driving to ${r.delivery_name||'destination'}`);await renderMyRoutes();
@@ -422,7 +426,7 @@ async function completeDispatchRoute(id){
   try{
     if(cur())endCurrent(false);
     const sb=await getCloud();
-    const {error}=await sb.from('dispatch_tasks').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;
+    const {error}=await setRouteStatus(sb,id,'completed',new Date().toISOString());if(error)throw error;
     if(Number(day.activeDispatchRouteId)===Number(id))day.activeDispatchRouteId=null;save();renderCurrent();toast('Route completed');await renderMyRoutes();
   }catch(e){toast('Route update failed');console.error(e)}
 }
@@ -431,6 +435,19 @@ function cloudConfigured(){
   return SUPABASE_URL.startsWith('https://') &&
     SUPABASE_PUBLISHABLE_KEY &&
     !SUPABASE_PUBLISHABLE_KEY.includes('__SUPABASE_');
+}
+/* v1.9.0: narrow SECURITY DEFINER RPCs (driver_app_*) first, old direct table calls as fallback.
+   Reads fall back on any RPC error; writes fall back only when the RPC does not exist (never applied twice). */
+function rpcMissing(e){return !!e&&(e.code==='PGRST202'||e.code==='42883'||/could not find the function/i.test(e.message||''))}
+async function rpcRead(sb,name,args,direct){try{const r=await sb.rpc(name,args);if(!r.error)return r;console.warn('RPC '+name+' failed; using direct query:',r.error.message)}catch(e){console.warn('RPC '+name+' threw; using direct query',e)}return await direct()}
+async function rpcWrite(sb,name,args,direct){let r;try{r=await sb.rpc(name,args)}catch(e){return {error:{message:String(e?.message||e)}}}if(r.error&&rpcMissing(r.error)){console.warn('RPC '+name+' missing; using direct write');return {direct:true,...(await direct())}}return {direct:false,...r}}
+async function setRouteStatus(sb,id,status,completedAt){
+  const d=currentDriverRecord();const patch={status,completed_at:completedAt};
+  const direct=()=>sb.from('dispatch_tasks').update(patch).eq('id',id);
+  if(!d)return await direct();
+  const r=await rpcWrite(sb,'driver_app_set_status',{p_task_id:Number(id),p_driver_id:Number(d.id),p_status:status,p_completed_at:completedAt},direct);
+  if(!r.error&&!r.direct&&r.data!==true)return {error:{code:'SHIFT_NOT_ASSIGNED',message:'This route is no longer assigned to you.'}};
+  return r;
 }
 async function getCloud(){
   if(!cloudConfigured())throw new Error('Supabase is not configured.');
@@ -474,9 +491,9 @@ async function renderVehicle(){
 
   try{
     const sb=await getCloud();
-    const {data:rows,error}=await sb.from('vehicles')
+    const {data:rows,error}=await rpcRead(sb,'driver_app_vehicle_docs',{p_name:day.vehicle},()=>sb.from('vehicles')
       .select('name,storage_folder,active,insurance_expiration,registration_expiration,safety_inspection_expiration')
-      .eq('name',day.vehicle).eq('active',true).limit(1);
+      .eq('name',day.vehicle).eq('active',true).limit(1));
     if(error)throw error;
     if(token!==vehicleLoadToken)return;
 
@@ -642,7 +659,7 @@ function pushLive(row){if(!row)return;liveWanted=row;sendLive()}
 async function sendLive(){
   if(liveSending||!liveWanted)return;liveSending=true;clearTimeout(liveRetry);
   const row=liveWanted;
-  try{const sb=await getCloud();const {error}=await sb.from('driver_live_status').upsert(row,{onConflict:'driver_id'});if(error)throw error;if(liveWanted===row)liveWanted=null}
+  try{const sb=await getCloud();const {error}=await rpcWrite(sb,'driver_app_live',{p_row:row},()=>sb.from('driver_live_status').upsert(row,{onConflict:'driver_id'}));if(error)throw error;if(liveWanted===row)liveWanted=null}
   catch(e){console.warn('Live status sync will retry',e?.message||e);liveRetry=setTimeout(sendLive,30000)}
   finally{liveSending=false;if(liveWanted&&liveWanted!==row)sendLive()}
 }
@@ -669,7 +686,7 @@ async function flushOutbox(){
       }
       let error=null;
       const sendRow=Object.fromEntries(Object.entries(item.row||{}).filter(([k])=>!k.startsWith('_')));
-      try{({error}=await sb.from(item.table).upsert(sendRow,item.opts))}catch(e){error={message:String(e?.message||e)}}
+      try{({error}=await rpcWrite(sb,'driver_app_submit',{p_table:item.table,p_row:sendRow},()=>sb.from(item.table).upsert(sendRow,item.opts)))}catch(e){error={message:String(e?.message||e)}}
       const cur=read(OUTBOX,[]),i=cur.findIndex(x=>x.qid===item.qid);
       if(!error){if(i>-1){cur.splice(i,1);write(OUTBOX,cur)}continue}
       console.warn('Cloud sync will retry',item.table,error);
